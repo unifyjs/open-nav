@@ -20,12 +20,12 @@ export const BookmarkItem = ({ title, icon, url, color }: BookmarkItemProps) => 
   return (
     <div className="col-span-1 group">
       <Button
-        variant="ghost"
-        className="w-full h-full p-0 flex flex-col items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-2xl border border-white/20 transition-all duration-200 hover:scale-105"
+        variant="none"
+        className="w-full h-full p-0 flex flex-col items-center justify-center backdrop-blur-sm rounded-2xl transition-all duration-200 hover:scale-105"
         onClick={handleClick}
       >
         <div 
-          className="w-12 h-12 rounded-xl flex items-center justify-center mb-2 overflow-hidden"
+          className="w-14 h-14 rounded-xl flex items-center justify-center mb-0 overflow-hidden"
           style={{ backgroundColor: color }}
         >
           <img 
