@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Coffee, StickyNote, Timer, TrendingUp } from "lucide-react";
+import { CountdownDialog } from "./CountdownDialog";
 
 interface WidgetItemProps {
   id: string;
@@ -10,6 +11,7 @@ interface WidgetItemProps {
 
 export const WidgetItem = ({ id, title, size }: WidgetItemProps) => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showCountdownDialog, setShowCountdownDialog] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -31,36 +33,45 @@ export const WidgetItem = ({ id, title, size }: WidgetItemProps) => {
     switch (id) {
       case "countdown":
         return (
-          <div className="w-full h-full p-4 flex flex-col">
-            <div className="flex items-center justify-center flex-1">
-              <img 
-                src="https://oss.nbtab.com/base/widget/offwork1.png" 
-                alt="休息时间"
-                className="w-16 h-16 object-contain"
-              />
+          <>
+            <div 
+              className="w-full h-full p-4 flex flex-col cursor-pointer hover:bg-white/5 transition-colors rounded-2xl"
+              onClick={() => setShowCountdownDialog(true)}
+            >
+              <div className="flex items-center justify-center flex-1">
+                <img 
+                  src="https://oss.nbtab.com/base/widget/offwork1.png" 
+                  alt="休息时间"
+                  className="w-16 h-16 object-contain"
+                />
+              </div>
+              <div className="text-center text-white mb-2">
+                <div className="text-lg font-medium">休息时间</div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="bg-blue-100/20 rounded p-2 text-center">
+                  <div className="text-white/80">发薪</div>
+                  <div className="text-white font-bold">17天</div>
+                </div>
+                <div className="bg-red-100/20 rounded p-2 text-center">
+                  <div className="text-white/80">元旦</div>
+                  <div className="text-white font-bold">64天</div>
+                </div>
+                <div className="bg-purple-100/20 rounded p-2 text-center">
+                  <div className="text-white/80">周五</div>
+                  <div className="text-white font-bold">2天</div>
+                </div>
+                <div className="bg-cyan-100/20 rounded p-2 text-center">
+                  <div className="text-white/80">日赚</div>
+                  <div className="text-white font-bold text-xs">199.27￥</div>
+                </div>
+              </div>
             </div>
-            <div className="text-center text-white mb-2">
-              <div className="text-lg font-medium">休息时间</div>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-blue-100/20 rounded p-2 text-center">
-                <div className="text-white/80">发薪</div>
-                <div className="text-white font-bold">17天</div>
-              </div>
-              <div className="bg-red-100/20 rounded p-2 text-center">
-                <div className="text-white/80">元旦</div>
-                <div className="text-white font-bold">64天</div>
-              </div>
-              <div className="bg-purple-100/20 rounded p-2 text-center">
-                <div className="text-white/80">周五</div>
-                <div className="text-white font-bold">2天</div>
-              </div>
-              <div className="bg-cyan-100/20 rounded p-2 text-center">
-                <div className="text-white/80">日赚</div>
-                <div className="text-white font-bold text-xs">199.27￥</div>
-              </div>
-            </div>
-          </div>
+            <CountdownDialog 
+              open={showCountdownDialog} 
+              onOpenChange={setShowCountdownDialog} 
+            />
+          </>
         );
 
       case "hotsearch":
