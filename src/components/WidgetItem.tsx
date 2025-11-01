@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Coffee, StickyNote, Timer, TrendingUp } from "lucide-react";
 import { CountdownDialog } from "./CountdownDialog";
+import { MemoDialog } from "./MemoDialog";
 
 interface WidgetItemProps {
   id: string;
@@ -12,6 +13,7 @@ interface WidgetItemProps {
 export const WidgetItem = ({ id, title, size }: WidgetItemProps) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showCountdownDialog, setShowCountdownDialog] = useState(false);
+  const [showMemoDialog, setShowMemoDialog] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -158,16 +160,25 @@ export const WidgetItem = ({ id, title, size }: WidgetItemProps) => {
 
       case "notes":
         return (
-          <div className="w-full h-full p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <StickyNote className="w-5 h-5 text-white" />
-              <span className="text-white font-medium">Notes</span>
+          <>
+            <div 
+              className="w-full h-full p-4 cursor-pointer hover:bg-white/5 transition-colors rounded-2xl"
+              onClick={() => setShowMemoDialog(true)}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <StickyNote className="w-5 h-5 text-white" />
+                <span className="text-white font-medium">Notes</span>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="text-white/80 truncate">NBtab 使用小技巧</div>
+                <div className="text-white/80 truncate">NBtab Usage Tips</div>
+              </div>
             </div>
-            <div className="space-y-2 text-sm">
-              <div className="text-white/80 truncate">NBtab 使用小技巧</div>
-              <div className="text-white/80 truncate">NBtab Usage Tips</div>
-            </div>
-          </div>
+            <MemoDialog 
+              open={showMemoDialog} 
+              onOpenChange={setShowMemoDialog} 
+            />
+          </>
         );
 
       case "tomato":
