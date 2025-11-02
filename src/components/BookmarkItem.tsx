@@ -5,9 +5,23 @@ interface BookmarkItemProps {
   icon: string;
   url: string;
   color: string;
+  size?: string;
 }
 
-export const BookmarkItem = ({ title, icon, url, color }: BookmarkItemProps) => {
+export const BookmarkItem = ({ title, icon, url, color, size = "1x1" }: BookmarkItemProps) => {
+  const getGridSpan = (size: string) => {
+    switch (size) {
+      case "1x1": return "col-span-1 row-span-1";
+      case "1x2": return "col-span-1 row-span-2";
+      case "2x1": return "col-span-2 row-span-1";
+      case "2x2": return "col-span-2 row-span-2";
+      case "2x4": return "col-span-2 row-span-4";
+      case "4x1": return "col-span-4 row-span-1";
+      case "4x2": return "col-span-4 row-span-2";
+      case "4x4": return "col-span-4 row-span-2";
+      default: return "col-span-1 row-span-1";
+    }
+  };
   const handleClick = () => {
     if (url.startsWith('chrome://') || url === '#') {
       // For demo purposes, just show an alert for chrome:// URLs and placeholder links
@@ -18,7 +32,6 @@ export const BookmarkItem = ({ title, icon, url, color }: BookmarkItemProps) => 
   };
 
   return (
-    <div className="col-span-1 group">
       <Button
         variant="none"
         className="w-full h-full p-0 flex flex-col items-center justify-center backdrop-blur-sm rounded-2xl transition-all duration-200 hover:scale-105"
@@ -47,6 +60,5 @@ export const BookmarkItem = ({ title, icon, url, color }: BookmarkItemProps) => 
           {title}
         </span>
       </Button>
-    </div>
   );
 };

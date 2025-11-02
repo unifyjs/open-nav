@@ -26,8 +26,8 @@ interface Memo {
 const defaultMemos: Memo[] = [
   {
     id: "1",
-    title: "Mytab 使用小技巧",
-    content: `Mytab 使用小技巧
+    title: "NBtab 使用小技巧",
+    content: `NBtab 使用小技巧
 
 1. 右键点击图标可以编辑图标信息
 2. 拖拽图标可以调整图标位置
@@ -217,9 +217,10 @@ export const MemoDialog = ({ open, onOpenChange }: MemoDialogProps) => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-4 w-4 p-0"
+                className="h-8 w-8 p-0"
                 onClick={() => onOpenChange(false)}
               >
+                <X className="h-4 w-4" />
               </Button>
             </div>
             
