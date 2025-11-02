@@ -27,6 +27,7 @@ export const WidgetItem = ({ id, title, size }: WidgetItemProps) => {
       case "1x1": return "col-span-1 row-span-1";
       case "2x2": return "col-span-2 row-span-2";
       case "2x4": return "col-span-2 row-span-4";
+      case "4x2": return "col-span-4 row-span-2";
       default: return "col-span-1 row-span-1";
     }
   };

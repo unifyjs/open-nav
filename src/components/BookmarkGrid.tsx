@@ -9,7 +9,7 @@ interface BookmarkGridProps {
 const bookmarkData = {
   主页: [
     // 功能小部件
-    { type: "widget", id: "countdown", title: "下班倒计时", size: "2x4" },
+    { type: "widget", id: "countdown", title: "下班倒计时", size: "4x2" },
     { type: "widget", id: "hotsearch", title: "今日热搜", size: "2x4" },
     { type: "widget", id: "calendar", title: "日历", size: "2x2" },
     
