@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { GripVertical } from "lucide-react";
 
 interface BookmarkItemProps {
   title: string;
@@ -6,9 +7,12 @@ interface BookmarkItemProps {
   url: string;
   color: string;
   size?: string;
+  isDragging?: boolean;
+  onDragStart?: (e: React.DragEvent) => void;
+  onDragEnd?: (e: React.DragEvent) => void;
 }
 
-export const BookmarkItem = ({ title, icon, url, color, size = "1x1" }: BookmarkItemProps) => {
+export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging = false, onDragStart, onDragEnd }: BookmarkItemProps) => {
   const getGridSpan = (size: string) => {
     switch (size) {
       case "1x1": return "col-span-1 row-span-1";
@@ -22,7 +26,13 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1" }: Bookmark
       default: return "col-span-1 row-span-1";
     }
   };
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    // Prevent click when dragging
+    if (isDragging) {
+      e.preventDefault();
+      return;
+    }
+    
     if (url.startsWith('chrome://') || url === '#') {
       // For demo purposes, just show an alert for chrome:// URLs and placeholder links
       alert(`This would open: ${url}`);
@@ -32,10 +42,15 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1" }: Bookmark
   };
 
   return (
+    <div className="relative w-full h-full group">
       <Button
         variant="none"
-        className="w-full h-full p-0 flex flex-col items-center justify-center backdrop-blur-sm rounded-2xl transition-all duration-200 hover:scale-105"
+        className={`w-full h-full p-0 flex flex-col items-center justify-center backdrop-blur-sm rounded-2xl transition-all duration-200 ${
+          isDragging ? 'opacity-50 scale-95' : 'hover:scale-105'
+        } cursor-pointer select-none`}
         onClick={handleClick}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
       >
         <div 
           className="w-14 h-14 rounded-xl flex items-center justify-center mb-0 overflow-hidden"
@@ -60,5 +75,11 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1" }: Bookmark
           {title}
         </span>
       </Button>
+      
+      {/* Drag Handle - visible on hover */}
+      <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-70 transition-opacity duration-200 pointer-events-none">
+        <GripVertical className="w-4 h-4 text-white/80" />
+      </div>
+    </div>
   );
 };

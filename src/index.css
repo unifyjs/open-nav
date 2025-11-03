@@ -2,6 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Drag and Drop Animations */
+@keyframes drag-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+@keyframes drop-zone {
+  0%, 100% { box-shadow: 0 0 0 2px transparent; }
+  50% { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); }
+}
+
+.drag-item {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drag-item:hover {
+  transform: translateY(-2px);
+}
+
+.drag-item.dragging {
+  animation: drag-pulse 1s ease-in-out infinite;
+  z-index: 1000;
+}
+
+.drop-zone {
+  animation: drop-zone 1.5s ease-in-out infinite;
+}
+
+/* Smooth transitions for grid items */
+.grid-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.grid-item:hover {
+  transform: translateY(-1px);
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */

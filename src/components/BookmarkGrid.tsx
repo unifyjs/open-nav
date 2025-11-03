@@ -158,12 +158,36 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
   const handleDragStart = (e: React.DragEvent, item: GridItem) => {
     setDraggedItem(item);
     e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", item.id);
+    
+    // Add visual feedback
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = "0.5";
+    }
+  };
+  
+  // Handle drag end
+  const handleDragEnd = (e: React.DragEvent) => {
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = "1";
+    }
+    setDraggedItem(null);
+    setDraggedOverIndex(null);
   };
 
   // Handle drag over
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
     setDraggedOverIndex(index);
+  };
+  
+  // Handle drag leave
+  const handleDragLeave = (e: React.DragEvent) => {
+    // Only clear if we're leaving the grid entirely
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setDraggedOverIndex(null);
+    }
   };
 
   // Handle drop
@@ -173,7 +197,11 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
     if (!draggedItem) return;
 
     const dragIndex = items.findIndex(item => item.id === draggedItem.id);
-    if (dragIndex === -1 || dragIndex === dropIndex) return;
+    if (dragIndex === -1 || dragIndex === dropIndex) {
+      setDraggedItem(null);
+      setDraggedOverIndex(null);
+      return;
+    }
 
     const newItems = [...items];
     const [removed] = newItems.splice(dragIndex, 1);
@@ -188,6 +216,9 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
     setItems(updatedItems);
     setDraggedItem(null);
     setDraggedOverIndex(null);
+    
+    // Show success feedback
+    console.log(`Moved "${draggedItem.title}" from position ${dragIndex} to ${dropIndex}`);
   };
 
   // Handle right click
@@ -234,17 +265,27 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
 
   return (
     <div className="flex-1 px-8 pb-8">
-      <div ref={gridRef} className="grid grid-cols-12 gap-6 auto-rows-[80px]">
+      <div ref={gridRef} className="grid grid-cols-12 gap-6 auto-rows-[80px] relative">
         {items.map((item, index) => {
           const isDraggedOver = draggedOverIndex === index;
+          const isDragging = draggedItem?.id === item.id;
           
           return (
             <div
               key={`${item.id}-${index}`}
-              className={`${getGridSpan(item.size || "1x1")} ${isDraggedOver ? 'opacity-50' : ''} cursor-move`}
+              className={`
+                grid-item drag-item
+                ${getGridSpan(item.size || "1x1")} 
+                ${isDraggedOver ? 'drop-zone ring-2 ring-white/50 ring-offset-2 ring-offset-transparent' : ''}
+                ${isDragging ? 'dragging opacity-30 scale-95' : ''}
+                transition-all duration-200 ease-in-out
+                cursor-move hover:z-10 relative
+              `}
               draggable
               onDragStart={(e) => handleDragStart(e, item)}
+              onDragEnd={handleDragEnd}
               onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, index)}
               onContextMenu={(e) => handleContextMenu(e, item)}
             >
@@ -261,6 +302,9 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
                   url={item.url || ""}
                   color={item.color || "#ffffff"}
                   size={item.size || "1x1"}
+                  isDragging={isDragging}
+                  onDragStart={(e) => handleDragStart(e, item)}
+                  onDragEnd={handleDragEnd}
                 />
               )}
             </div>

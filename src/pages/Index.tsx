@@ -6,6 +6,7 @@ import { BookmarkGrid } from "@/components/BookmarkGrid";
 import { VideoBackground } from "@/components/VideoBackground";
 import { TopBar } from "@/components/TopBar";
 import { DailyQuote } from "@/components/DailyQuote";
+import { DragHint } from "@/components/DragHint";
 
 const Index = () => {
   const [currentCategory, setCurrentCategory] = useState("主页");
@@ -38,6 +39,9 @@ const Index = () => {
         {/* Bookmark Grid */}
         <BookmarkGrid category={currentCategory} />
       </div>
+      
+      {/* Drag Hint */}
+      <DragHint />
     </div>
   );
 };
