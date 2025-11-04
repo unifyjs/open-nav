@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { BookmarkItem } from "./BookmarkItem";
 import { WidgetItem } from "./WidgetItem";
 import { SizeSelector } from "./SizeSelector";
+import { AddComponentDialog } from "./AddComponentDialog";
 
 interface BookmarkGridProps {
   category: string;
@@ -120,6 +121,7 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
   const [items, setItems] = useState<GridItem[]>([]);
   const [draggedItem, setDraggedItem] = useState<GridItem | null>(null);
   const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
+  const [showAddDialog, setShowAddDialog] = useState(false);
   const [contextMenu, setContextMenu] = useState<{
     show: boolean;
     x: number;
@@ -240,6 +242,47 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
     setContextMenu({ show: false, x: 0, y: 0, item: null });
   };
 
+  // Handle adding new component
+  const handleAddComponent = (component: any) => {
+    const newItem: GridItem = {
+      type: "bookmark",
+      id: component.id,
+      title: component.title,
+      icon: component.icon,
+      url: component.url,
+      color: component.color,
+      size: "1x1",
+      order: items.length
+    };
+    
+    setItems(prev => [...prev, newItem]);
+    setShowAddDialog(false);
+  };
+
+  // Handle bookmark item click
+  const handleBookmarkClick = (item: GridItem, e: React.MouseEvent) => {
+    // Prevent click when dragging
+    if (draggedItem) {
+      e.preventDefault();
+      return;
+    }
+    
+    // Check if this is the "add" button
+    if (item.id === "add" || item.title === "添加图标") {
+      e.preventDefault();
+      setShowAddDialog(true);
+      return;
+    }
+    
+    // Handle normal bookmark clicks
+    if (item.url && item.url.startsWith('chrome://') || item.url === '#') {
+      // For demo purposes, just show an alert for chrome:// URLs and placeholder links
+      alert(`This would open: ${item.url}`);
+    } else if (item.url) {
+      window.open(item.url, '_blank');
+    }
+  };
+
   // Close context menu when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
@@ -305,6 +348,7 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
                   isDragging={isDragging}
                   onDragStart={(e) => handleDragStart(e, item)}
                   onDragEnd={handleDragEnd}
+                  onClick={(e) => handleBookmarkClick(item, e)}
                 />
               )}
             </div>
@@ -322,6 +366,13 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
           onClose={() => setContextMenu({ show: false, x: 0, y: 0, item: null })}
         />
       )}
+      
+      {/* Add Component Dialog */}
+      <AddComponentDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        onAddComponent={handleAddComponent}
+      />
     </div>
   );
 };

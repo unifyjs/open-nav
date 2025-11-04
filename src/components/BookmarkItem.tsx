@@ -10,9 +10,10 @@ interface BookmarkItemProps {
   isDragging?: boolean;
   onDragStart?: (e: React.DragEvent) => void;
   onDragEnd?: (e: React.DragEvent) => void;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
-export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging = false, onDragStart, onDragEnd }: BookmarkItemProps) => {
+export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging = false, onDragStart, onDragEnd, onClick }: BookmarkItemProps) => {
   const getGridSpan = (size: string) => {
     switch (size) {
       case "1x1": return "col-span-1 row-span-1";
@@ -33,6 +34,13 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging
       return;
     }
     
+    // If custom onClick handler is provided, use it
+    if (onClick) {
+      onClick(e);
+      return;
+    }
+    
+    // Default click behavior
     if (url.startsWith('chrome://') || url === '#') {
       // For demo purposes, just show an alert for chrome:// URLs and placeholder links
       alert(`This would open: ${url}`);

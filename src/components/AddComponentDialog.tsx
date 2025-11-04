@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { X, Plus, Search } from "lucide-react";
 
 interface AddComponentDialogProps {
   open: boolean;
@@ -162,16 +163,72 @@ const availableComponents: ComponentItem[] = [
   }
 ];
 
+interface WebsiteData {
+  categories: { id: string; label: string }[];
+  websites: {
+    id: string;
+    title: string;
+    description: string;
+    icon: string;
+    url: string;
+    color: string;
+    category: string;
+  }[];
+}
+
 export const AddComponentDialog = ({ open, onOpenChange, onAddComponent }: AddComponentDialogProps) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [activeTab, setActiveTab] = useState("components");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [websiteData, setWebsiteData] = useState<WebsiteData | null>(null);
+  const [selectedWebsiteCategory, setSelectedWebsiteCategory] = useState("hot");
+
+  // Load website data from JSON file
+  useEffect(() => {
+    const loadWebsiteData = async () => {
+      try {
+        const response = await fetch('/data/websites.json');
+        const data = await response.json();
+        setWebsiteData(data);
+      } catch (error) {
+        console.error('Failed to load website data:', error);
+      }
+    };
+    
+    if (open) {
+      loadWebsiteData();
+    }
+  }, [open]);
 
   const filteredComponents = selectedCategory === "all" 
     ? availableComponents 
     : availableComponents.filter(comp => comp.category === selectedCategory);
 
+  // Filter websites based on category and search query
+  const filteredWebsites = websiteData ? websiteData.websites.filter(website => {
+    const matchesCategory = selectedWebsiteCategory === "hot" || website.category === selectedWebsiteCategory;
+    const matchesSearch = searchQuery === "" || 
+      website.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      website.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  }) : [];
+
   const handleAddComponent = (component: ComponentItem) => {
     onAddComponent(component);
+  };
+
+  const handleAddWebsite = (website: any) => {
+    const componentItem: ComponentItem = {
+      id: website.id,
+      title: website.title,
+      description: website.description,
+      icon: website.icon,
+      color: website.color,
+      url: website.url,
+      category: website.category,
+      type: "bookmark"
+    };
+    onAddComponent(componentItem);
   };
 
   return (
@@ -259,9 +316,91 @@ export const AddComponentDialog = ({ open, onOpenChange, onAddComponent }: AddCo
               </div>
             </TabsContent>
 
-            <TabsContent value="navigation" className="flex-1 p-6">
-              <div className="flex items-center justify-center h-full text-gray-500">
-                网址导航功能开发中...
+            <TabsContent value="navigation" className="flex-1 flex flex-col mt-0">
+              {/* Search Bar */}
+              <div className="px-6 py-4 border-b">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    placeholder="请输入搜索名称"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              {/* Website Category Filter */}
+              <div className="px-6 py-4 border-b">
+                <div className="flex flex-wrap gap-2">
+                  {websiteData?.categories.map((category) => (
+                    <Badge
+                      key={category.id}
+                      variant={selectedWebsiteCategory === category.id ? "default" : "outline"}
+                      className={`cursor-pointer transition-colors ${
+                        selectedWebsiteCategory === category.id 
+                          ? 'bg-blue-600 text-white' 
+                          : 'hover:bg-gray-100'
+                      }`}
+                      onClick={() => setSelectedWebsiteCategory(category.id)}
+                    >
+                      {category.label}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Websites Grid */}
+              <div className="flex-1 p-6 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-4">
+                  {filteredWebsites.map((website) => (
+                    <div
+                      key={website.id}
+                      className="relative bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div 
+                          className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
+                          style={{ backgroundColor: website.color }}
+                        >
+                          <img 
+                            src={website.icon} 
+                            alt={website.title}
+                            className="w-8 h-8 object-contain"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML = `<span class="text-white font-bold text-lg">${website.title.charAt(0)}</span>`;
+                              }
+                            }}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-gray-900 mb-1">
+                            {website.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 line-clamp-2">
+                            {website.description}
+                          </p>
+                        </div>
+                        <Button
+                          size="sm"
+                          className="w-8 h-8 p-0 rounded-full bg-blue-600 hover:bg-blue-700 flex-shrink-0"
+                          onClick={() => handleAddWebsite(website)}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {filteredWebsites.length === 0 && (
+                  <div className="flex items-center justify-center h-32 text-gray-500">
+                    {searchQuery ? '未找到匹配的网站' : '暂无网站数据'}
+                  </div>
+                )}
               </div>
             </TabsContent>
 
