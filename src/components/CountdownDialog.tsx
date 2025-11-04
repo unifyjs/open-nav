@@ -154,15 +154,6 @@ export const CountdownDialog = ({ open, onOpenChange }: CountdownDialogProps) =>
           
           {/* Right Side - Settings */}
           <div className="w-80 p-6 bg-white border-l">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute top-4 right-4 h-8 w-8 p-0"
-              onClick={() => onOpenChange(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-            
             <div className="space-y-6 mt-8">
               {/* Work Days */}
               <div>

@@ -23,7 +23,7 @@ interface GridItem {
 const defaultBookmarkData: Record<string, GridItem[]> = {
   主页: [
     // 功能小部件
-    { type: "widget", id: "countdown", title: "下班倒计时", size: "2x4", order: 0 },
+    { type: "widget", id: "countdown", title: "下班倒计时", size: "4x2", order: 0 },
     { type: "widget", id: "hotsearch", title: "今日热搜", size: "2x4", order: 1 },
     { type: "widget", id: "calendar", title: "日历", size: "2x2", order: 2 },
     
@@ -133,7 +133,7 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
 
   // Load items from localStorage or use default data
   useEffect(() => {
-    const savedData = localStorage.getItem(`nbtab-grid-${category}`);
+    const savedData = localStorage.getItem(`opennav-grid-${category}`);
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
@@ -152,7 +152,7 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
   // Save items to localStorage whenever items change
   useEffect(() => {
     if (items.length > 0) {
-      localStorage.setItem(`nbtab-grid-${category}`, JSON.stringify(items));
+      localStorage.setItem(`opennav-grid-${category}`, JSON.stringify(items));
     }
   }, [items, category]);
 

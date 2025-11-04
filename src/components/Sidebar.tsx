@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Home, Bot, Coffee, Code, Palette, Megaphone, Plus, Settings } from "lucide-react";
+import { SettingsDialog } from "@/components/SettingsDialog";
 
 interface SidebarProps {
   currentCategory: string;
@@ -17,6 +19,8 @@ const categories = [
 ];
 
 export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
   return (
     <div className="fixed left-0 top-0 h-full w-[60px] bg-slate-800/40 backdrop-blur-sm border-r border-white/10 z-40 flex flex-col">
       {/* Logo */}
@@ -78,6 +82,7 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
             variant="ghost"
             size="sm"
             className="w-full h-10 p-0 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            onClick={() => setSettingsOpen(true)}
           >
             <Settings className="w-5 h-5" />
           </Button>
@@ -87,6 +92,12 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
           </div>
         </div>
       </div>
+      
+      {/* Settings Dialog */}
+      <SettingsDialog 
+        open={settingsOpen} 
+        onOpenChange={setSettingsOpen} 
+      />
     </div>
   );
 };

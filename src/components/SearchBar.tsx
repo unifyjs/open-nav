@@ -47,12 +47,11 @@ export const SearchBar = () => {
       <form onSubmit={handleSearch} className="flex items-center bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 max-w-2xl w-full">
         {/* Search Engine Selector */}
         <Select value={selectedEngine} onValueChange={setSelectedEngine}>
-          <SelectTrigger className="w-[80px] border-none bg-transparent text-white focus:ring-0 focus:ring-offset-0">
+          <SelectTrigger className="w-[60px] border-none bg-transparent text-white focus:ring-0 focus:ring-offset-0">
             <div className="flex items-center">
               <span className="text-lg">
                 {searchEngines.find(engine => engine.value === selectedEngine)?.icon}
               </span>
-              <ChevronDown className="w-4 h-4 ml-1" />
             </div>
           </SelectTrigger>
           <SelectContent>

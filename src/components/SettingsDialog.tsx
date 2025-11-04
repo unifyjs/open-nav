@@ -84,31 +84,11 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     setSettings(newSettings);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
     
-    // 应用背景设置到页面
-    applyWallpaperSettings(newSettings);
+    // 触发自定义事件，通知 VideoBackground 组件更新
+    window.dispatchEvent(new Event('wallpaperSettingsChanged'));
   };
 
-  // 应用壁纸设置到页面
-  const applyWallpaperSettings = (wallpaperSettings: WallpaperSettings) => {
-    const videoBackground = document.querySelector('.video-background') as HTMLElement;
-    if (videoBackground) {
-      videoBackground.style.backgroundImage = `url(${wallpaperSettings.backgroundImage})`;
-      videoBackground.style.backgroundSize = 'cover';
-      videoBackground.style.backgroundPosition = 'center';
-      
-      // 应用遮罩和模糊效果
-      const overlay = videoBackground.querySelector('.bg-overlay') as HTMLElement;
-      if (overlay) {
-        overlay.style.backgroundColor = `rgba(0, 0, 0, ${wallpaperSettings.maskOpacity / 100})`;
-      }
-      
-      if (wallpaperSettings.blur > 0) {
-        videoBackground.style.filter = `blur(${wallpaperSettings.blur}px)`;
-      } else {
-        videoBackground.style.filter = 'none';
-      }
-    }
-  };
+
 
   // 选择预设壁纸
   const selectWallpaper = (imageUrl: string) => {
@@ -157,7 +137,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     <div className="flex-1 p-6 space-y-6">
       {/* 当前壁纸预览 */}
       <div className="space-y-3">
-        <div className="aspect-video w-full max-w-sm rounded-lg overflow-hidden border border-white/20 relative">
+      <div className="aspect-video w-full max-w-sm rounded-lg overflow-hidden border border-white/20 relative">
           <img
             src={settings.backgroundImage}
             alt="当前壁纸"
@@ -229,8 +209,8 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
 
       {/* 遮罩浓度 */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium text-white">
-          遮罩浓度: {settings.maskOpacity}%
+      <Label className="text-sm font-medium text-white">
+        遮罩浓度: {settings.maskOpacity}%
         </Label>
         <Slider
           value={[settings.maskOpacity]}
@@ -244,8 +224,8 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
 
       {/* 模糊度 */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium text-white">
-          模糊度: {settings.blur}%
+      <Label className="text-sm font-medium text-white">
+        模糊度: {settings.blur}%
         </Label>
         <Slider
           value={[settings.blur]}
@@ -259,8 +239,8 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
 
       {/* 显示切换壁纸小风车 */}
       <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium text-white">显示切换壁纸小风车</Label>
-        <Switch
+      <Label className="text-sm font-medium text-white">显示切换壁纸小风车</Label>
+      <Switch
           checked={settings.showWindmill}
           onCheckedChange={toggleWindmill}
         />
@@ -286,20 +266,12 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-slate-800/95 backdrop-blur-sm border border-white/20 text-white fixed right-4 top-4 bottom-4 left-auto translate-x-0 translate-y-0">
-        <div className="flex h-full">
+      <DialogContent className="max-w-4xl min-h-[90vh] max-h-[90vh] p-0 bg-slate-800/60 backdrop-blur-sm border border-white/20 text-white fixed">
+      <div className="flex h-full">
           {/* 左侧设置选项 */}
           <div className="w-48 border-r border-white/10 flex flex-col">
             <div className="p-4 border-b border-white/10 flex items-center justify-between">
               <h2 className="text-lg font-medium">设置</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-white/70 hover:text-white hover:bg-white/10"
-                onClick={() => onOpenChange(false)}
-              >
-                <X className="w-4 h-4" />
-              </Button>
             </div>
             
             <div className="flex-1 py-2">

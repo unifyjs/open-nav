@@ -172,8 +172,8 @@ export const WidgetItem = ({ id, title, size }: WidgetItemProps) => {
                 <span className="text-white font-medium">Notes</span>
               </div>
               <div className="space-y-2 text-sm">
-                <div className="text-white/80 truncate">NBtab 使用小技巧</div>
-                <div className="text-white/80 truncate">NBtab Usage Tips</div>
+                <div className="text-white/80 truncate">OpenNav 使用小技巧</div>
+                <div className="text-white/80 truncate">OpenNav Usage Tips</div>
               </div>
             </div>
             <MemoDialog 

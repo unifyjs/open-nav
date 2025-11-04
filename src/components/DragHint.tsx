@@ -6,7 +6,7 @@ export const DragHint = () => {
 
   useEffect(() => {
     // Check if user has seen the hint before
-    const hasSeenHint = localStorage.getItem('nbtab-drag-hint-seen');
+    const hasSeenHint = localStorage.getItem('opennav-drag-hint-seen');
     if (!hasSeenHint) {
       // Show hint after a short delay
       const timer = setTimeout(() => {
@@ -18,7 +18,7 @@ export const DragHint = () => {
 
   const dismissHint = () => {
     setShowHint(false);
-    localStorage.setItem('nbtab-drag-hint-seen', 'true');
+    localStorage.setItem('opennav-drag-hint-seen', 'true');
   };
 
   if (!showHint) return null;

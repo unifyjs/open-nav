@@ -26,8 +26,8 @@ interface Memo {
 const defaultMemos: Memo[] = [
   {
     id: "1",
-    title: "NBtab 使用小技巧",
-    content: `NBtab 使用小技巧
+    title: "OpenNav 使用小技巧",
+    content: `OpenNav 使用小技巧
 
 1. 右键点击图标可以编辑图标信息
 2. 拖拽图标可以调整图标位置
@@ -40,7 +40,7 @@ const defaultMemos: Memo[] = [
 1. 所有数据均存储在本地，不会上传到服务器
 2. 您的浏览记录和个人信息完全私密
 
-了解更多：https://nbtab.com/help`,
+了解更多：https://OpenNav.com/help`,
     createdAt: new Date("2024-10-30T10:00:00"),
     updatedAt: new Date("2024-10-31T15:30:00"),
   },
@@ -67,7 +67,7 @@ export const MemoDialog = ({ open, onOpenChange }: MemoDialogProps) => {
 
   // Load memos from localStorage on component mount
   useEffect(() => {
-    const savedMemos = localStorage.getItem("nbtab-memos");
+    const savedMemos = localStorage.getItem("opennav-memos");
     if (savedMemos) {
       try {
         const parsedMemos = JSON.parse(savedMemos).map((memo: any) => ({
@@ -96,7 +96,7 @@ export const MemoDialog = ({ open, onOpenChange }: MemoDialogProps) => {
   // Save memos to localStorage whenever memos change
   useEffect(() => {
     if (memos.length > 0) {
-      localStorage.setItem("nbtab-memos", JSON.stringify(memos));
+      localStorage.setItem("opennav-memos", JSON.stringify(memos));
     }
   }, [memos]);
 
