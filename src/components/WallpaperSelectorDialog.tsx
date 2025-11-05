@@ -255,14 +255,6 @@ export const WallpaperSelectorDialog = ({
         {/* 标题栏 */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-medium">壁纸</h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onOpenChange(false)}
-            className="h-6 w-6 p-0 hover:bg-gray-100"
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </div>
 
         <div className="flex h-full">

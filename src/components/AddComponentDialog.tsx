@@ -239,20 +239,12 @@ export const AddComponentDialog = ({ open, onOpenChange, onAddComponent }: AddCo
           <DialogHeader className="p-6 border-b">
             <div className="flex items-center justify-between">
               <DialogTitle className="text-xl font-semibold">添加组件</DialogTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={() => onOpenChange(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
             </div>
           </DialogHeader>
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 mx-6 mt-4">
+            <TabsList className="grid w-full grid-cols-3 mt-4">
               <TabsTrigger value="components">组件库</TabsTrigger>
               <TabsTrigger value="navigation">网址导航</TabsTrigger>
               <TabsTrigger value="custom">自定义图标</TabsTrigger>

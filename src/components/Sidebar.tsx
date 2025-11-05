@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Home, Bot, Coffee, Code, Palette, Megaphone, Plus, Settings } from "lucide-react";
 import { SettingsDialog } from "@/components/SettingsDialog";
+
+interface SidebarProps {
+  currentCategory: string;
+  onCategoryChange: (category: string) => void;
+}
 
 interface SidebarProps {
   currentCategory: string;
@@ -20,9 +25,100 @@ const categories = [
 
 export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [sidebarSettings, setSidebarSettings] = useState<SidebarSettings>({
+    position: 'left',
+    autoHide: false,
+    scrollSwitch: true,
+    width: 60,
+    opacity: 40
+  });
+  const [isVisible, setIsVisible] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
+
+  // 加载侧边栏设置
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('sidebar_settings');
+    if (savedSettings) {
+      try {
+        const parsed = JSON.parse(savedSettings);
+        setSidebarSettings(parsed);
+      } catch (error) {
+        console.error('Failed to parse sidebar settings:', error);
+      }
+    }
+
+    // 监听设置变化
+    const handleSettingsChange = (event: CustomEvent) => {
+      setSidebarSettings(event.detail);
+    };
+
+    window.addEventListener('sidebarSettingsChanged', handleSettingsChange as EventListener);
+    return () => {
+      window.removeEventListener('sidebarSettingsChanged', handleSettingsChange as EventListener);
+    };
+  }, []);
+
+  // 自动隐藏逻辑
+  useEffect(() => {
+    if (sidebarSettings.autoHide) {
+      setIsVisible(isHovered);
+    } else {
+      setIsVisible(true);
+    }
+  }, [sidebarSettings.autoHide, isHovered]);
+
+  // 滚轮切换分组功能
+  useEffect(() => {
+    if (!sidebarSettings.scrollSwitch) return;
+
+    let scrollTimeout: NodeJS.Timeout;
+    const handleWheel = (e: WheelEvent) => {
+      // 清除之前的定时器
+      clearTimeout(scrollTimeout);
+      
+      // 设置新的定时器，防止频繁触发
+      scrollTimeout = setTimeout(() => {
+        const currentIndex = categories.findIndex(cat => cat.id === currentCategory);
+        
+        if (e.deltaY > 0 && currentIndex < categories.length - 1) {
+          // 向下滚动，切换到下一个分组
+          onCategoryChange(categories[currentIndex + 1].id);
+        } else if (e.deltaY < 0 && currentIndex > 0) {
+          // 向上滚动，切换到上一个分组
+          onCategoryChange(categories[currentIndex - 1].id);
+        }
+      }, 150); // 150ms 防抖
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      clearTimeout(scrollTimeout);
+    };
+  }, [sidebarSettings.scrollSwitch, currentCategory, onCategoryChange]);
+
+  const sidebarStyle = {
+    width: `${sidebarSettings.width}px`,
+    backgroundColor: `rgba(30, 41, 59, ${sidebarSettings.opacity / 100})`,
+    opacity: sidebarSettings.autoHide && !isVisible ? 
+      0 : 
+      `${sidebarSettings.opacity / 100}`,
+    transition: 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out'
+  };
+
+  const positionClasses = sidebarSettings.position === 'left' ? 'left-0' : 'right-0';
 
   return (
-    <div className="fixed left-0 top-0 h-full w-[60px] bg-slate-800/40 backdrop-blur-sm border-r border-white/10 z-40 flex flex-col">
+    <div 
+      className={cn(
+        "fixed top-0 h-full backdrop-blur-sm border-white/10 z-40 flex flex-col",
+        positionClasses,
+        sidebarSettings.position === 'left' ? 'border-r' : 'border-l'
+      )}
+      style={sidebarStyle}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Logo */}
       <div className="p-3 border-b border-white/10">
         <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
@@ -52,7 +148,10 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
               </Button>
               
               {/* Category Label */}
-              <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+              <div className={cn(
+                "absolute top-1/2 -translate-y-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50",
+                sidebarSettings.position === 'left' ? 'left-full ml-2' : 'right-full mr-2'
+              )}>
                 {category.label}
               </div>
             </div>
@@ -69,7 +168,10 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
             <Plus className="w-5 h-5" />
           </Button>
           
-          <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+          <div className={cn(
+            "absolute top-1/2 -translate-y-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50",
+            sidebarSettings.position === 'left' ? 'left-full ml-2' : 'right-full mr-2'
+          )}>
             添加分类
           </div>
         </div>
@@ -87,7 +189,10 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
             <Settings className="w-5 h-5" />
           </Button>
           
-          <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+          <div className={cn(
+            "absolute top-1/2 -translate-y-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50",
+            sidebarSettings.position === 'left' ? 'left-full ml-2' : 'right-full mr-2'
+          )}>
             设置
           </div>
         </div>

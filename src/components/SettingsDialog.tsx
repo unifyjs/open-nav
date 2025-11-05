@@ -51,6 +51,14 @@ interface DateTimeSettings {
   fontColor: string;
 }
 
+interface SidebarSettings {
+  position: 'left' | 'right';
+  autoHide: boolean;
+  scrollSwitch: boolean;
+  width: number;
+  opacity: number;
+}
+
 const settingsOptions = [
   { id: "personal", label: "个人信息", icon: User },
   { id: "wallpaper", label: "壁纸", icon: ImageIcon },
@@ -75,6 +83,7 @@ const defaultWallpapers = [
 const STORAGE_KEY = "wallpaper_settings";
 const OPEN_METHOD_STORAGE_KEY = "open_method_settings";
 const DATETIME_STORAGE_KEY = "datetime_settings";
+const SIDEBAR_STORAGE_KEY = "sidebar_settings";
 
 export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const [selectedOption, setSelectedOption] = useState("wallpaper");
@@ -102,6 +111,13 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     isBold: false,
     fontSize: 70,
     fontColor: "#ffffff"
+  });
+  const [sidebarSettings, setSidebarSettings] = useState<SidebarSettings>({
+    position: 'left',
+    autoHide: false,
+    scrollSwitch: true,
+    width: 60,
+    opacity: 75
   });
 
   // 从 localStorage 加载设置
@@ -137,6 +153,17 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         console.error("Failed to parse datetime settings:", error);
       }
     }
+    
+    // 加载侧边栏设置
+    const savedSidebarSettings = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+    if (savedSidebarSettings) {
+      try {
+        const parsed = JSON.parse(savedSidebarSettings);
+        setSidebarSettings(parsed);
+      } catch (error) {
+        console.error("Failed to parse sidebar settings:", error);
+      }
+    }
   }, []);
 
   // 保存设置到 localStorage
@@ -164,6 +191,15 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     
     // 触发自定义事件，通知其他组件更新
     window.dispatchEvent(new CustomEvent('dateTimeSettingsChanged', { detail: newSettings }));
+  };
+
+  // 保存侧边栏设置到 localStorage
+  const saveSidebarSettings = (newSettings: SidebarSettings) => {
+    setSidebarSettings(newSettings);
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(newSettings));
+    
+    // 触发自定义事件，通知其他组件更新
+    window.dispatchEvent(new CustomEvent('sidebarSettingsChanged', { detail: newSettings }));
   };
 
   // 切换新标签页打开设置
@@ -277,6 +313,32 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const selectFontColor = (color: string) => {
     const newSettings = { ...dateTimeSettings, fontColor: color };
     saveDateTimeSettings(newSettings);
+  };
+
+  // 侧边栏设置处理函数
+  const toggleSidebarPosition = (position: 'left' | 'right') => {
+    const newSettings = { ...sidebarSettings, position };
+    saveSidebarSettings(newSettings);
+  };
+
+  const toggleAutoHide = (checked: boolean) => {
+    const newSettings = { ...sidebarSettings, autoHide: checked };
+    saveSidebarSettings(newSettings);
+  };
+
+  const toggleScrollSwitch = (checked: boolean) => {
+    const newSettings = { ...sidebarSettings, scrollSwitch: checked };
+    saveSidebarSettings(newSettings);
+  };
+
+  const updateSidebarWidth = (value: number[]) => {
+    const newSettings = { ...sidebarSettings, width: value[0] };
+    saveSidebarSettings(newSettings);
+  };
+
+  const updateSidebarOpacity = (value: number[]) => {
+    const newSettings = { ...sidebarSettings, opacity: value[0] };
+    saveSidebarSettings(newSettings);
   };
 
   const renderWallpaperSettings = () => (
@@ -570,6 +632,139 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     </div>
   );
 
+  const renderSidebarSettings = () => (
+    <div className="flex-1 p-6 space-y-6">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <h3 className="text-lg font-medium text-white">侧边栏设置</h3>
+          <p className="text-sm text-white/60">配置侧边栏的位置、显示和行为选项</p>
+        </div>
+        
+        <div className="space-y-6">
+          {/* 位置选择 */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-white">位置</Label>
+            <div className="grid grid-cols-2 gap-4">
+              {/* 左侧选项 */}
+              <div
+                className={cn(
+                  "relative p-4 rounded-lg border-2 cursor-pointer transition-all hover:scale-105",
+                  sidebarSettings.position === 'left'
+                    ? "border-blue-500 bg-blue-500/10"
+                    : "border-white/20 hover:border-white/40"
+                )}
+                onClick={() => toggleSidebarPosition('left')}
+              >
+                <div className="aspect-video bg-white/5 rounded border border-white/10 relative overflow-hidden">
+                  <div className="absolute left-0 top-0 w-3 h-full bg-white/30"></div>
+                  <div className="absolute right-2 top-2 w-8 h-1 bg-white/20 rounded"></div>
+                  <div className="absolute right-2 top-4 w-6 h-1 bg-white/20 rounded"></div>
+                </div>
+                <div className="mt-2 text-center">
+                  <Button
+                    size="sm"
+                    className={cn(
+                      "text-xs",
+                      sidebarSettings.position === 'left'
+                        ? "bg-blue-600 hover:bg-blue-700 text-white"
+                        : "bg-white/10 hover:bg-white/20 text-white/70"
+                    )}
+                  >
+                    左侧
+                  </Button>
+                </div>
+              </div>
+              
+              {/* 右侧选项 */}
+              <div
+                className={cn(
+                  "relative p-4 rounded-lg border-2 cursor-pointer transition-all hover:scale-105",
+                  sidebarSettings.position === 'right'
+                    ? "border-blue-500 bg-blue-500/10"
+                    : "border-white/20 hover:border-white/40"
+                )}
+                onClick={() => toggleSidebarPosition('right')}
+              >
+                <div className="aspect-video bg-white/5 rounded border border-white/10 relative overflow-hidden">
+                  <div className="absolute right-0 top-0 w-3 h-full bg-white/30"></div>
+                  <div className="absolute left-2 top-2 w-8 h-1 bg-white/20 rounded"></div>
+                  <div className="absolute left-2 top-4 w-6 h-1 bg-white/20 rounded"></div>
+                </div>
+                <div className="mt-2 text-center">
+                  <Button
+                    size="sm"
+                    className={cn(
+                      "text-xs",
+                      sidebarSettings.position === 'right'
+                        ? "bg-blue-600 hover:bg-blue-700 text-white"
+                        : "bg-white/10 hover:bg-white/20 text-white/70"
+                    )}
+                  >
+                    右侧
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 自动隐藏开关 */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-white">自动隐藏</Label>
+              <p className="text-xs text-white/60">鼠标移入时显示，移出时自动隐藏侧边栏</p>
+            </div>
+            <Switch
+              checked={sidebarSettings.autoHide}
+              onCheckedChange={toggleAutoHide}
+            />
+          </div>
+
+          {/* 鼠标滚轮切换分组开关 */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-white">鼠标滚轮切换分组</Label>
+              <p className="text-xs text-white/60">页面滚动时自动切换到下一个分组</p>
+            </div>
+            <Switch
+              checked={sidebarSettings.scrollSwitch}
+              onCheckedChange={toggleScrollSwitch}
+            />
+          </div>
+
+          {/* 宽度调整 */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-white">
+              宽度: {sidebarSettings.width}px
+            </Label>
+            <Slider
+              value={[sidebarSettings.width]}
+              onValueChange={updateSidebarWidth}
+              max={120}
+              min={40}
+              step={5}
+              className="w-full"
+            />
+          </div>
+
+          {/* 透明度调整 */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-white">
+              透明度: {sidebarSettings.opacity}%
+            </Label>
+            <Slider
+              value={[sidebarSettings.opacity]}
+              onValueChange={updateSidebarOpacity}
+              max={100}
+              min={10}
+              step={5}
+              className="w-full"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderSettingContent = () => {
     switch (selectedOption) {
       case "wallpaper":
@@ -578,6 +773,8 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         return renderOpenMethodSettings();
       case "datetime":
         return renderDateTimeSettings();
+      case "sidebar":
+        return renderSidebarSettings();
       default:
         return (
           <div className="flex-1 p-6 flex items-center justify-center">

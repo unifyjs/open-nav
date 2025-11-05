@@ -214,24 +214,21 @@ export const MemoDialog = ({ open, onOpenChange }: MemoDialogProps) => {
               <DialogTitle className="text-xl font-semibold">
                 {selectedMemo?.title || "备忘录"}
               </DialogTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={() => onOpenChange(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
             </div>
             
-            <div className="flex-1 p-4">
+            <div className="flex-1 p-1">
               {selectedMemo ? (
-                <div className="h-full flex flex-col">
+                <div className="h-full flex flex-col border-none focus:border-none">
                   <Textarea
                     value={editingContent}
                     onChange={(e) => setEditingContent(e.target.value)}
                     placeholder="开始编写您的备忘录..."
-                    className="flex-1 resize-none border-none focus:ring-0 focus:border-none text-sm leading-relaxed"
+                    className="flex-1 resize-none border-none focus:border-none text-sm outline-none 
+                    hide-scrollbar
+                    focus:ring-0 focus-visible:outline-none focus-visible:border-0 
+                    bg-[linear-gradient(transparent_95%,rgba(255,255,255,0.3)_95%)] 
+                    bg-[length:100%_2rem] leading-[2rem] 
+                    h-[6rem] overflow-auto transition-all"
                     style={{ minHeight: '400px' }}
                   />
                   

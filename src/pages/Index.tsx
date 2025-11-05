@@ -21,7 +21,16 @@ interface DateTimeSettings {
   fontColor: string;
 }
 
+interface SidebarSettings {
+  position: 'left' | 'right';
+  autoHide: boolean;
+  scrollSwitch: boolean;
+  width: number;
+  opacity: number;
+}
+
 const DATETIME_STORAGE_KEY = "datetime_settings";
+const SIDEBAR_STORAGE_KEY = "sidebar_settings";
 
 const defaultSettings: DateTimeSettings = {
   showTime: true,
@@ -39,6 +48,13 @@ const defaultSettings: DateTimeSettings = {
 const Index = () => {
   const [currentCategory, setCurrentCategory] = useState("主页");
   const [settings, setSettings] = useState<DateTimeSettings>(defaultSettings);
+  const [sidebarSettings, setSidebarSettings] = useState<SidebarSettings>({
+    position: 'left',
+    autoHide: false,
+    scrollSwitch: true,
+    width: 60,
+    opacity: 40
+  });
 
   // 加载设置
   useEffect(() => {
@@ -62,6 +78,29 @@ const Index = () => {
     return () => {
       window.removeEventListener('dateTimeSettingsChanged', handleSettingsChange as EventListener);
     };
+
+    // 加载侧边栏设置
+    const savedSidebarSettings = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+    if (savedSidebarSettings) {
+      try {
+        const parsed = JSON.parse(savedSidebarSettings);
+        setSidebarSettings(parsed);
+      } catch (error) {
+        console.error('Failed to parse sidebar settings:', error);
+      }
+    }
+
+    // 监听侧边栏设置变化
+    const handleSidebarSettingsChange = (event: CustomEvent) => {
+      setSidebarSettings(event.detail);
+    };
+
+    window.addEventListener('sidebarSettingsChanged', handleSidebarSettingsChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('dateTimeSettingsChanged', handleSettingsChange as EventListener);
+      window.removeEventListener('sidebarSettingsChanged', handleSidebarSettingsChange as EventListener);
+    };
   }, []);
 
   return (
@@ -79,7 +118,13 @@ const Index = () => {
       />
       
       {/* Main Content */}
-      <div className="ml-[60px] min-h-screen flex flex-col">
+      <div 
+        className="min-h-screen flex flex-col transition-all duration-300"
+        style={{
+          marginLeft: sidebarSettings.position === 'left' ? `${sidebarSettings.width}px` : '0',
+          marginRight: sidebarSettings.position === 'right' ? `${sidebarSettings.width}px` : '0'
+        }}
+      >
         {/* Time Display */}
         <TimeDisplay />
         

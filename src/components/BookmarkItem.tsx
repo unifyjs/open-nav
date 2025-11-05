@@ -59,7 +59,7 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging
     <div className="relative w-full h-full group">
       <Button
         variant="none"
-        className={`w-full h-full p-0 flex flex-col items-center justify-center backdrop-blur-sm rounded-2xl transition-all duration-200 ${
+        className={`w-full h-full p-0 flex flex-col items-center justify-center  rounded-2xl transition-all duration-200 ${
           isDragging ? 'opacity-50 scale-95' : 'hover:scale-105'
         } cursor-pointer select-none`}
         onClick={handleClick}
