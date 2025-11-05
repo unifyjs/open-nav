@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WallpaperSelectorDialog } from "./WallpaperSelectorDialog";
+import { ColorPicker } from "./ColorPicker";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -35,6 +36,19 @@ interface WallpaperSettings {
 
 interface OpenMethodSettings {
   openInNewTab: boolean;
+}
+
+interface DateTimeSettings {
+  showTime: boolean;
+  showSearchBar: boolean;
+  showMonthDay: boolean;
+  showWeek: boolean;
+  showLunar: boolean;
+  show24Hour: boolean;
+  showSeconds: boolean;
+  isBold: boolean;
+  fontSize: number;
+  fontColor: string;
 }
 
 const settingsOptions = [
@@ -60,11 +74,13 @@ const defaultWallpapers = [
 
 const STORAGE_KEY = "wallpaper_settings";
 const OPEN_METHOD_STORAGE_KEY = "open_method_settings";
+const DATETIME_STORAGE_KEY = "datetime_settings";
 
 export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const [selectedOption, setSelectedOption] = useState("wallpaper");
   const [showWallpaperSelector, setShowWallpaperSelector] = useState(false);
   const [showAdvancedWallpaperSelector, setShowAdvancedWallpaperSelector] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
   const [settings, setSettings] = useState<WallpaperSettings>({
     backgroundImage: defaultWallpapers[0],
     maskOpacity: 0,
@@ -74,6 +90,18 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   });
   const [openMethodSettings, setOpenMethodSettings] = useState<OpenMethodSettings>({
     openInNewTab: true
+  });
+  const [dateTimeSettings, setDateTimeSettings] = useState<DateTimeSettings>({
+    showTime: true,
+    showSearchBar: true,
+    showMonthDay: true,
+    showWeek: true,
+    showLunar: true,
+    show24Hour: true,
+    showSeconds: false,
+    isBold: false,
+    fontSize: 70,
+    fontColor: "#ffffff"
   });
 
   // 从 localStorage 加载设置
@@ -98,6 +126,17 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         console.error("Failed to parse open method settings:", error);
       }
     }
+    
+    // 加载时间日期设置
+    const savedDateTimeSettings = localStorage.getItem(DATETIME_STORAGE_KEY);
+    if (savedDateTimeSettings) {
+      try {
+        const parsed = JSON.parse(savedDateTimeSettings);
+        setDateTimeSettings(parsed);
+      } catch (error) {
+        console.error("Failed to parse datetime settings:", error);
+      }
+    }
   }, []);
 
   // 保存设置到 localStorage
@@ -116,6 +155,15 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     
     // 触发自定义事件，通知其他组件更新
     window.dispatchEvent(new CustomEvent('openMethodSettingsChanged', { detail: newSettings }));
+  };
+
+  // 保存时间日期设置到 localStorage
+  const saveDateTimeSettings = (newSettings: DateTimeSettings) => {
+    setDateTimeSettings(newSettings);
+    localStorage.setItem(DATETIME_STORAGE_KEY, JSON.stringify(newSettings));
+    
+    // 触发自定义事件，通知其他组件更新
+    window.dispatchEvent(new CustomEvent('dateTimeSettingsChanged', { detail: newSettings }));
   };
 
   // 切换新标签页打开设置
@@ -178,6 +226,57 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const toggleWindmill = (checked: boolean) => {
     const newSettings = { ...settings, showWindmill: checked };
     saveSettings(newSettings);
+  };
+
+  // 时间日期设置处理函数
+  const toggleShowTime = (checked: boolean) => {
+    const newSettings = { ...dateTimeSettings, showTime: checked };
+    saveDateTimeSettings(newSettings);
+  };
+
+  const toggleShowSearchBar = (checked: boolean) => {
+    const newSettings = { ...dateTimeSettings, showSearchBar: checked };
+    saveDateTimeSettings(newSettings);
+  };
+
+  const toggleShowMonthDay = (checked: boolean) => {
+    const newSettings = { ...dateTimeSettings, showMonthDay: checked };
+    saveDateTimeSettings(newSettings);
+  };
+
+  const toggleShowWeek = (checked: boolean) => {
+    const newSettings = { ...dateTimeSettings, showWeek: checked };
+    saveDateTimeSettings(newSettings);
+  };
+
+  const toggleShowLunar = (checked: boolean) => {
+    const newSettings = { ...dateTimeSettings, showLunar: checked };
+    saveDateTimeSettings(newSettings);
+  };
+
+  const toggleShow24Hour = (checked: boolean) => {
+    const newSettings = { ...dateTimeSettings, show24Hour: checked };
+    saveDateTimeSettings(newSettings);
+  };
+
+  const toggleShowSeconds = (checked: boolean) => {
+    const newSettings = { ...dateTimeSettings, showSeconds: checked };
+    saveDateTimeSettings(newSettings);
+  };
+
+  const toggleIsBold = (checked: boolean) => {
+    const newSettings = { ...dateTimeSettings, isBold: checked };
+    saveDateTimeSettings(newSettings);
+  };
+
+  const updateFontSize = (value: number[]) => {
+    const newSettings = { ...dateTimeSettings, fontSize: value[0] };
+    saveDateTimeSettings(newSettings);
+  };
+
+  const selectFontColor = (color: string) => {
+    const newSettings = { ...dateTimeSettings, fontColor: color };
+    saveDateTimeSettings(newSettings);
   };
 
   const renderWallpaperSettings = () => (
@@ -330,12 +429,155 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     </div>
   );
 
+  const renderDateTimeSettings = () => (
+    <div className="flex-1 p-6 space-y-6">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <h3 className="text-lg font-medium text-white">时间日期设置</h3>
+          <p className="text-sm text-white/60">配置时间显示和搜索栏的显示选项</p>
+        </div>
+        
+        <div className="space-y-4">
+          {/* 显示时间开关 */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-white">显示时间</Label>
+              <p className="text-xs text-white/60">控制页面上时间的显示和隐藏</p>
+            </div>
+            <Switch
+              checked={dateTimeSettings.showTime}
+              onCheckedChange={toggleShowTime}
+            />
+          </div>
+          
+          {/* 显示搜索栏开关 */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-white">显示搜索栏</Label>
+              <p className="text-xs text-white/60">控制页面上搜索栏的显示和隐藏</p>
+            </div>
+            <Switch
+              checked={dateTimeSettings.showSearchBar}
+              onCheckedChange={toggleShowSearchBar}
+            />
+          </div>
+          
+          {/* 时间显示项目 */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-white">时间显示项目</Label>
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                variant={dateTimeSettings.showMonthDay ? "default" : "outline"}
+                size="sm"
+                onClick={() => toggleShowMonthDay(!dateTimeSettings.showMonthDay)}
+                className={dateTimeSettings.showMonthDay ? "bg-blue-600 hover:bg-blue-700" : "border-white/20 text-white hover:bg-white/10"}
+              >
+                月日
+              </Button>
+              <Button
+                variant={dateTimeSettings.showWeek ? "default" : "outline"}
+                size="sm"
+                onClick={() => toggleShowWeek(!dateTimeSettings.showWeek)}
+                className={dateTimeSettings.showWeek ? "bg-blue-600 hover:bg-blue-700" : "border-white/20 text-white hover:bg-white/10"}
+              >
+                周
+              </Button>
+              <Button
+                variant={dateTimeSettings.showLunar ? "default" : "outline"}
+                size="sm"
+                onClick={() => toggleShowLunar(!dateTimeSettings.showLunar)}
+                className={dateTimeSettings.showLunar ? "bg-blue-600 hover:bg-blue-700" : "border-white/20 text-white hover:bg-white/10"}
+              >
+                农历
+              </Button>
+              <Button
+                variant={dateTimeSettings.show24Hour ? "default" : "outline"}
+                size="sm"
+                onClick={() => toggleShow24Hour(!dateTimeSettings.show24Hour)}
+                className={dateTimeSettings.show24Hour ? "bg-blue-600 hover:bg-blue-700" : "border-white/20 text-white hover:bg-white/10"}
+              >
+                24
+              </Button>
+              <Button
+                variant={dateTimeSettings.showSeconds ? "default" : "outline"}
+                size="sm"
+                onClick={() => toggleShowSeconds(!dateTimeSettings.showSeconds)}
+                className={dateTimeSettings.showSeconds ? "bg-blue-600 hover:bg-blue-700" : "border-white/20 text-white hover:bg-white/10"}
+              >
+                秒
+              </Button>
+              <Button
+                variant={dateTimeSettings.isBold ? "default" : "outline"}
+                size="sm"
+                onClick={() => toggleIsBold(!dateTimeSettings.isBold)}
+                className={dateTimeSettings.isBold ? "bg-blue-600 hover:bg-blue-700" : "border-white/20 text-white hover:bg-white/10"}
+              >
+                粗体
+              </Button>
+            </div>
+          </div>
+          
+          {/* 字体大小 */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-white">
+              大小: {dateTimeSettings.fontSize}px
+            </Label>
+            <Slider
+              value={[dateTimeSettings.fontSize]}
+              onValueChange={updateFontSize}
+              max={120}
+              min={20}
+              step={1}
+              className="w-full"
+            />
+          </div>
+          
+          {/* 颜色选择 */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-white">颜色</Label>
+            <div className="flex items-center gap-3">
+              {/* 预设颜色 */}
+              <div className="flex gap-2">
+                {["#3b82f6", "#10b981", "#f59e0b", "#ef4444"].map((color) => (
+                  <button
+                    key={color}
+                    className={`w-8 h-8 rounded border-2 transition-colors ${
+                      dateTimeSettings.fontColor === color 
+                        ? "border-white" 
+                        : "border-white/20 hover:border-white/40"
+                    }`}
+                    style={{ backgroundColor: color }}
+                    onClick={() => selectFontColor(color)}
+                  />
+                ))}
+                {/* 自定义颜色按钮 */}
+                <button
+                  className="w-8 h-8 rounded border-2 border-white/20 hover:border-white/40 bg-white/10 flex items-center justify-center text-white text-xs transition-colors"
+                  onClick={() => setShowColorPicker(true)}
+                >
+                  +
+                </button>
+              </div>
+              {/* 当前颜色显示 */}
+              <div
+                className="w-8 h-8 rounded border border-white/20"
+                style={{ backgroundColor: dateTimeSettings.fontColor }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderSettingContent = () => {
     switch (selectedOption) {
       case "wallpaper":
         return renderWallpaperSettings();
       case "openMethod":
         return renderOpenMethodSettings();
+      case "datetime":
+        return renderDateTimeSettings();
       default:
         return (
           <div className="flex-1 p-6 flex items-center justify-center">
@@ -392,6 +634,14 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         onOpenChange={setShowAdvancedWallpaperSelector}
         onWallpaperSelect={selectAdvancedWallpaper}
         currentWallpaper={settings.backgroundImage}
+      />
+      
+      {/* 颜色选择器 */}
+      <ColorPicker
+        open={showColorPicker}
+        onOpenChange={setShowColorPicker}
+        onColorSelect={selectFontColor}
+        currentColor={dateTimeSettings.fontColor}
       />
     </Dialog>
   );

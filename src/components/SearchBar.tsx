@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +9,34 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, ChevronDown } from "lucide-react";
+
+interface DateTimeSettings {
+  showTime: boolean;
+  showSearchBar: boolean;
+  showMonthDay: boolean;
+  showWeek: boolean;
+  showLunar: boolean;
+  show24Hour: boolean;
+  showSeconds: boolean;
+  isBold: boolean;
+  fontSize: number;
+  fontColor: string;
+}
+
+const DATETIME_STORAGE_KEY = "datetime_settings";
+
+const defaultSettings: DateTimeSettings = {
+  showTime: true,
+  showSearchBar: true,
+  showMonthDay: true,
+  showWeek: true,
+  showLunar: true,
+  show24Hour: true,
+  showSeconds: false,
+  isBold: false,
+  fontSize: 70,
+  fontColor: "#ffffff"
+};
 
 const searchEngines = [
   { value: "default", label: "Default", icon: "🔍" },
@@ -23,6 +51,31 @@ const searchEngines = [
 export const SearchBar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEngine, setSelectedEngine] = useState("default");
+  const [settings, setSettings] = useState<DateTimeSettings>(defaultSettings);
+
+  // 加载设置
+  useEffect(() => {
+    const savedSettings = localStorage.getItem(DATETIME_STORAGE_KEY);
+    if (savedSettings) {
+      try {
+        const parsed = JSON.parse(savedSettings);
+        setSettings({ ...defaultSettings, ...parsed });
+      } catch (error) {
+        console.error("Failed to parse datetime settings:", error);
+      }
+    }
+
+    // 监听设置变化
+    const handleSettingsChange = (event: CustomEvent) => {
+      setSettings({ ...defaultSettings, ...event.detail });
+    };
+
+    window.addEventListener('dateTimeSettingsChanged', handleSettingsChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('dateTimeSettingsChanged', handleSettingsChange as EventListener);
+    };
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +94,11 @@ export const SearchBar = () => {
     
     window.open(urls[selectedEngine as keyof typeof urls], '_blank');
   };
+
+  // 如果设置为不显示搜索栏，则返回 null
+  if (!settings.showSearchBar) {
+    return null;
+  }
 
   return (
     <div className="flex justify-center px-8 mb-8">
