@@ -18,6 +18,7 @@ import {
   RefreshCw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { WallpaperSelectorDialog } from "./WallpaperSelectorDialog";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -58,6 +59,7 @@ const STORAGE_KEY = "wallpaper_settings";
 export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const [selectedOption, setSelectedOption] = useState("wallpaper");
   const [showWallpaperSelector, setShowWallpaperSelector] = useState(false);
+  const [showAdvancedWallpaperSelector, setShowAdvancedWallpaperSelector] = useState(false);
   const [settings, setSettings] = useState<WallpaperSettings>({
     backgroundImage: defaultWallpapers[0],
     maskOpacity: 0,
@@ -95,6 +97,19 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     const newSettings = { ...settings, backgroundImage: imageUrl };
     saveSettings(newSettings);
     setShowWallpaperSelector(false);
+  };
+
+  // 从高级壁纸选择器选择壁纸
+  const selectAdvancedWallpaper = (wallpaperUrl: string) => {
+    // 如果是纯色，创建渐变背景
+    let backgroundImage = wallpaperUrl;
+    if (wallpaperUrl.startsWith('#')) {
+      backgroundImage = `linear-gradient(135deg, ${wallpaperUrl}, ${wallpaperUrl})`;
+    }
+    
+    const newSettings = { ...settings, backgroundImage };
+    saveSettings(newSettings);
+    setShowAdvancedWallpaperSelector(false);
   };
 
   // 下载当前壁纸
@@ -157,7 +172,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         
         <div className="flex gap-3">
           <Button
-            onClick={() => setShowWallpaperSelector(!showWallpaperSelector)}
+            onClick={() => setShowAdvancedWallpaperSelector(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             更换壁纸
@@ -301,6 +316,14 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
           {renderSettingContent()}
         </div>
       </DialogContent>
+      
+      {/* 高级壁纸选择弹框 */}
+      <WallpaperSelectorDialog
+        open={showAdvancedWallpaperSelector}
+        onOpenChange={setShowAdvancedWallpaperSelector}
+        onWallpaperSelect={selectAdvancedWallpaper}
+        currentWallpaper={settings.backgroundImage}
+      />
     </Dialog>
   );
 };

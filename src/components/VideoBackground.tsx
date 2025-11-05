@@ -82,7 +82,9 @@ export const VideoBackground = () => {
         <div 
           className="w-full h-full bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url(${settings.backgroundImage})`,
+            background: settings.backgroundImage.startsWith('#') || settings.backgroundImage.startsWith('linear-gradient') 
+              ? settings.backgroundImage 
+              : `url(${settings.backgroundImage})`,
             filter: settings.blur > 0 ? `blur(${settings.blur}px)` : 'none'
           }}
         >
