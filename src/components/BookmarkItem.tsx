@@ -8,12 +8,13 @@ interface BookmarkItemProps {
   color: string;
   size?: string;
   isDragging?: boolean;
+  openInNewTab?: boolean;
   onDragStart?: (e: React.DragEvent) => void;
   onDragEnd?: (e: React.DragEvent) => void;
   onClick?: (e: React.MouseEvent) => void;
 }
 
-export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging = false, onDragStart, onDragEnd, onClick }: BookmarkItemProps) => {
+export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging = false, openInNewTab = true, onDragStart, onDragEnd, onClick }: BookmarkItemProps) => {
   const getGridSpan = (size: string) => {
     switch (size) {
       case "1x1": return "col-span-1 row-span-1";
@@ -45,7 +46,12 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging
       // For demo purposes, just show an alert for chrome:// URLs and placeholder links
       alert(`This would open: ${url}`);
     } else {
-      window.open(url, '_blank');
+      // 根据设置决定打开方式
+      if (openInNewTab) {
+        window.open(url, '_blank');
+      } else {
+        window.location.href = url;
+      }
     }
   };
 

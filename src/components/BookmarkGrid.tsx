@@ -122,6 +122,7 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
   const [draggedItem, setDraggedItem] = useState<GridItem | null>(null);
   const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [openInNewTab, setOpenInNewTab] = useState(true); // 默认在新标签页打开
   const [contextMenu, setContextMenu] = useState<{
     show: boolean;
     x: number;
@@ -147,6 +148,32 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
       const defaultItems = defaultBookmarkData[category as keyof typeof defaultBookmarkData] || [];
       setItems(defaultItems);
     }
+    
+    // 加载打开方式设置
+    const loadOpenMethodSettings = () => {
+      const savedOpenMethodSettings = localStorage.getItem('open_method_settings');
+      if (savedOpenMethodSettings) {
+        try {
+          const parsed = JSON.parse(savedOpenMethodSettings);
+          setOpenInNewTab(parsed.openInNewTab ?? true);
+        } catch (error) {
+          console.error("Failed to parse open method settings:", error);
+        }
+      }
+    };
+    
+    loadOpenMethodSettings();
+    
+    // 监听打开方式设置变化
+    const handleOpenMethodSettingsChange = (event: CustomEvent) => {
+      setOpenInNewTab(event.detail.openInNewTab ?? true);
+    };
+    
+    window.addEventListener('openMethodSettingsChanged', handleOpenMethodSettingsChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('openMethodSettingsChanged', handleOpenMethodSettingsChange as EventListener);
+    };
   }, [category]);
 
   // Save items to localStorage whenever items change
@@ -279,7 +306,12 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
       // For demo purposes, just show an alert for chrome:// URLs and placeholder links
       alert(`This would open: ${item.url}`);
     } else if (item.url) {
-      window.open(item.url, '_blank');
+      // 根据设置决定打开方式
+      if (openInNewTab) {
+        window.open(item.url, '_blank');
+      } else {
+        window.location.href = item.url;
+      }
     }
   };
 
@@ -346,6 +378,7 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
                   color={item.color || "#ffffff"}
                   size={item.size || "1x1"}
                   isDragging={isDragging}
+                  openInNewTab={openInNewTab}
                   onDragStart={(e) => handleDragStart(e, item)}
                   onDragEnd={handleDragEnd}
                   onClick={(e) => handleBookmarkClick(item, e)}

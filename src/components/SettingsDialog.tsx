@@ -33,6 +33,10 @@ interface WallpaperSettings {
   customUrl: string;
 }
 
+interface OpenMethodSettings {
+  openInNewTab: boolean;
+}
+
 const settingsOptions = [
   { id: "personal", label: "个人信息", icon: User },
   { id: "wallpaper", label: "壁纸", icon: ImageIcon },
@@ -55,6 +59,7 @@ const defaultWallpapers = [
 ];
 
 const STORAGE_KEY = "wallpaper_settings";
+const OPEN_METHOD_STORAGE_KEY = "open_method_settings";
 
 export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const [selectedOption, setSelectedOption] = useState("wallpaper");
@@ -66,6 +71,9 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     blur: 0,
     showWindmill: true,
     customUrl: ""
+  });
+  const [openMethodSettings, setOpenMethodSettings] = useState<OpenMethodSettings>({
+    openInNewTab: true
   });
 
   // 从 localStorage 加载设置
@@ -79,6 +87,17 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         console.error("Failed to parse wallpaper settings:", error);
       }
     }
+    
+    // 加载打开方式设置
+    const savedOpenMethodSettings = localStorage.getItem(OPEN_METHOD_STORAGE_KEY);
+    if (savedOpenMethodSettings) {
+      try {
+        const parsed = JSON.parse(savedOpenMethodSettings);
+        setOpenMethodSettings(parsed);
+      } catch (error) {
+        console.error("Failed to parse open method settings:", error);
+      }
+    }
   }, []);
 
   // 保存设置到 localStorage
@@ -90,7 +109,20 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     window.dispatchEvent(new Event('wallpaperSettingsChanged'));
   };
 
+  // 保存打开方式设置到 localStorage
+  const saveOpenMethodSettings = (newSettings: OpenMethodSettings) => {
+    setOpenMethodSettings(newSettings);
+    localStorage.setItem(OPEN_METHOD_STORAGE_KEY, JSON.stringify(newSettings));
+    
+    // 触发自定义事件，通知其他组件更新
+    window.dispatchEvent(new CustomEvent('openMethodSettingsChanged', { detail: newSettings }));
+  };
 
+  // 切换新标签页打开设置
+  const toggleOpenInNewTab = (checked: boolean) => {
+    const newSettings = { ...openMethodSettings, openInNewTab: checked };
+    saveOpenMethodSettings(newSettings);
+  };
 
   // 选择预设壁纸
   const selectWallpaper = (imageUrl: string) => {
@@ -263,10 +295,47 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     </div>
   );
 
+  const renderOpenMethodSettings = () => (
+    <div className="flex-1 p-6 space-y-6">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <h3 className="text-lg font-medium text-white">打开方式设置</h3>
+          <p className="text-sm text-white/60">配置点击书签图标时的打开行为</p>
+        </div>
+        
+        <div className="space-y-4">
+          {/* 新标签页打开设置 */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-white">在新标签页中打开</Label>
+              <p className="text-xs text-white/60">启用后，点击书签图标将在新标签页中打开链接</p>
+            </div>
+            <Switch
+              checked={openMethodSettings.openInNewTab}
+              onCheckedChange={toggleOpenInNewTab}
+            />
+          </div>
+          
+          {/* 当前设置状态显示 */}
+          <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+            <div className="flex items-center space-x-2">
+              <ExternalLink className="w-4 h-4 text-blue-400" />
+              <span className="text-sm text-blue-400">
+                当前设置：{openMethodSettings.openInNewTab ? '新标签页打开' : '当前页面打开'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderSettingContent = () => {
     switch (selectedOption) {
       case "wallpaper":
         return renderWallpaperSettings();
+      case "openMethod":
+        return renderOpenMethodSettings();
       default:
         return (
           <div className="flex-1 p-6 flex items-center justify-center">
