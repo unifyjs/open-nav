@@ -730,7 +730,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   };
 
   const renderWallpaperSettings = () => (
-    <div className="flex-1 p-6 space-y-6">
+    <div className="p-6 space-y-6">
       {/* 当前壁纸预览 */}
       <div className="space-y-3">
       <div className="aspect-video w-full max-w-sm rounded-lg overflow-hidden border border-white/20 relative">
@@ -845,7 +845,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   );
 
   const renderOpenMethodSettings = () => (
-    <div className="flex-1 p-6 space-y-6">
+    <div className="p-6 space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
           <h3 className="text-lg font-medium text-white">打开方式设置</h3>
@@ -880,7 +880,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   );
 
   const renderDateTimeSettings = () => (
-    <div className="flex-1 p-6 space-y-6">
+    <div className="p-6 space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
           <h3 className="text-lg font-medium text-white">时间日期设置</h3>
@@ -1021,7 +1021,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   );
 
   const renderSidebarSettings = () => (
-    <div className="flex-1 p-6 space-y-6">
+    <div className="p-6 space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
           <h3 className="text-lg font-medium text-white">侧边栏设置</h3>
@@ -1154,7 +1154,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   );
 
   const renderIconSettings = () => (
-    <div className="flex-1 p-6 space-y-6">
+    <div className="p-6 space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
           <h3 className="text-lg font-medium text-white">图标设置</h3>
@@ -1410,10 +1410,16 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     <div className="flex-1 p-6 space-y-6">
       <div className="flex flex-col items-center justify-center space-y-6 max-w-md mx-auto">
         {/* Logo */}
-        <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center">
+        
+        {userInfo?(
+          <></>
+        ):(
+
+          <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center">
           <span className="text-white text-2xl font-bold">B</span>
         </div>
-        
+        )}
+
         {!userInfo ? (
           // 未登录状态
           <>
@@ -1521,7 +1527,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   );
 
   const renderAboutSettings = () => (
-    <div className="flex-1 p-6 space-y-6">
+    <div className="p-6 space-y-6">
       <div className="space-y-6">
         {/* 欢迎加入微信内测福利群 */}
         <div className="text-center space-y-4">
@@ -1621,7 +1627,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         return renderAboutSettings();
       default:
         return (
-          <div className="flex-1 p-6 flex items-center justify-center">
+          <div className="p-6 flex items-center justify-center">
             <div className="text-center text-white/60">
               <div className="text-lg mb-2">功能开发中</div>
               <div className="text-sm">该功能正在开发中，敬请期待</div>
@@ -1665,7 +1671,9 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
           </div>
 
           {/* 右侧设置内容 */}
-          {renderSettingContent()}
+          <div className="flex-1 overflow-y-auto">
+            {renderSettingContent()}
+          </div>
         </div>
       </DialogContent>
       
