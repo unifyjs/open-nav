@@ -958,6 +958,87 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     </div>
   );
 
+  const renderAboutSettings = () => (
+    <div className="flex-1 p-6 space-y-6">
+      <div className="space-y-6">
+        {/* 欢迎加入微信内测福利群 */}
+        <div className="text-center space-y-4">
+          <h3 className="text-lg font-medium text-white">欢迎加入微信内测福利群</h3>
+          
+          {/* 微信群二维码卡片 */}
+          <div className="bg-white/5 border border-white/10 rounded-lg p-6 max-w-sm mx-auto">
+            <div className="text-center space-y-3">
+              <div className="w-64 h-64 bg-white rounded-lg mx-auto flex items-center justify-center overflow-hidden">
+                <img 
+                  src="./images/wechat_qr_code_20251106_012217.png" 
+                  alt="OpenNav标签页-内测群"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-white font-medium">OpenNav标签页-内测群</p>
+                <p className="text-xs text-white/60">二维码7天内有效，过期后请重新获取</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 功能入口 */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
+            <span className="text-white text-sm">更新日志</span>
+            <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+          
+          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
+            <span className="text-white text-sm">用户反馈</span>
+            <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+          
+          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
+            <span className="text-white text-sm">常见问题</span>
+            <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+
+        {/* 官方链接 */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
+            <span className="text-white text-sm">应用官网</span>
+            <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+          
+          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
+            <span className="text-white text-sm">隐私政策</span>
+            <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+          
+          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
+            <span className="text-white text-sm">免责声明</span>
+            <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+
+        {/* 备案信息 */}
+        <div className="text-center pt-4">
+          <p className="text-xs text-white/40">xxxxxxxxx-x</p>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderSettingContent = () => {
     switch (selectedOption) {
       case "wallpaper":
@@ -970,6 +1051,8 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         return renderSidebarSettings();
       case "icons":
         return renderIconSettings();
+      case "about":
+        return renderAboutSettings();
       default:
         return (
           <div className="flex-1 p-6 flex items-center justify-center">
