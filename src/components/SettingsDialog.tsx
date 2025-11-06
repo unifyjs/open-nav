@@ -15,7 +15,8 @@ import {
   Grid3X3,
   Info,
   ExternalLink,
-  RefreshCw
+  RefreshCw,
+  Trash2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WallpaperSelectorDialog } from "./WallpaperSelectorDialog";
@@ -68,6 +69,14 @@ interface IconSettings {
   maxWidth: number;
 }
 
+interface UserInfo {
+  id: string;
+  username: string;
+  email: string;
+  avatar: string;
+  loginTime: string;
+}
+
 const settingsOptions = [
   { id: "personal", label: "个人信息", icon: User },
   { id: "wallpaper", label: "壁纸", icon: ImageIcon },
@@ -94,6 +103,7 @@ const OPEN_METHOD_STORAGE_KEY = "open_method_settings";
 const DATETIME_STORAGE_KEY = "datetime_settings";
 const SIDEBAR_STORAGE_KEY = "sidebar_settings";
 const ICON_STORAGE_KEY = "icon_settings";
+const USER_INFO_STORAGE_KEY = "user_info";
 
 export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const [selectedOption, setSelectedOption] = useState("wallpaper");
@@ -137,6 +147,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     nameSize: 12,
     maxWidth: 1388
   });
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   // 从 localStorage 加载设置
   useEffect(() => {
@@ -191,6 +202,19 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         setIconSettings(parsed);
       } catch (error) {
         console.error("Failed to parse icon settings:", error);
+      }
+    }
+  }, []);
+
+  // 从 localStorage 加载用户信息
+  useEffect(() => {
+    const savedUserInfo = localStorage.getItem(USER_INFO_STORAGE_KEY);
+    if (savedUserInfo) {
+      try {
+        const parsed = JSON.parse(savedUserInfo);
+        setUserInfo(parsed);
+      } catch (error) {
+        console.error("Failed to parse user info:", error);
       }
     }
   }, []);
@@ -420,6 +444,110 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
       maxWidth: 1388
     };
     saveIconSettings(defaultSettings);
+  };
+
+  // Mock 登录功能
+  const handleMockLogin = () => {
+    const mockUser: UserInfo = {
+      id: `user_${Date.now()}`,
+      username: "演示用户",
+      email: "demo@example.com",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+      loginTime: new Date().toLocaleString()
+    };
+    
+    setUserInfo(mockUser);
+    localStorage.setItem(USER_INFO_STORAGE_KEY, JSON.stringify(mockUser));
+  };
+
+  // 退出登录
+  const handleLogout = () => {
+    setUserInfo(null);
+    localStorage.removeItem(USER_INFO_STORAGE_KEY);
+  };
+
+  // 删除本地全部数据
+  const handleDeleteAllData = () => {
+    if (window.confirm("确定要删除所有本地数据吗？此操作不可恢复！")) {
+      // 清除所有相关的 localStorage 数据
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(OPEN_METHOD_STORAGE_KEY);
+      localStorage.removeItem(DATETIME_STORAGE_KEY);
+      localStorage.removeItem(SIDEBAR_STORAGE_KEY);
+      localStorage.removeItem(ICON_STORAGE_KEY);
+      localStorage.removeItem(USER_INFO_STORAGE_KEY);
+      
+      // 重置所有状态到默认值
+      setSettings({
+        backgroundImage: defaultWallpapers[0],
+        maskOpacity: 0,
+        blur: 0,
+        showWindmill: true,
+        customUrl: ""
+      });
+      setOpenMethodSettings({ openInNewTab: true });
+      setDateTimeSettings({
+        showTime: true,
+        showSearchBar: true,
+        showMonthDay: true,
+        showWeek: true,
+        showLunar: true,
+        show24Hour: true,
+        showSeconds: false,
+        isBold: false,
+        fontSize: 70,
+        fontColor: "#ffffff"
+      });
+      setSidebarSettings({
+        position: 'left',
+        autoHide: false,
+        scrollSwitch: true,
+        width: 60,
+        opacity: 75
+      });
+      setIconSettings({
+        iconSize: 60,
+        iconBorderRadius: 16,
+        iconSpacing: 27,
+        showName: true,
+        nameSize: 12,
+        maxWidth: 1388
+      });
+      setUserInfo(null);
+      
+      // 触发事件通知其他组件更新
+      window.dispatchEvent(new Event('wallpaperSettingsChanged'));
+      window.dispatchEvent(new CustomEvent('openMethodSettingsChanged', { detail: { openInNewTab: true } }));
+      window.dispatchEvent(new CustomEvent('dateTimeSettingsChanged', { detail: {
+        showTime: true,
+        showSearchBar: true,
+        showMonthDay: true,
+        showWeek: true,
+        showLunar: true,
+        show24Hour: true,
+        showSeconds: false,
+        isBold: false,
+        fontSize: 70,
+        fontColor: "#ffffff"
+      } }));
+      window.dispatchEvent(new CustomEvent('sidebarSettingsChanged', { detail: {
+        position: 'left',
+        autoHide: false,
+        scrollSwitch: true,
+        width: 60,
+        opacity: 75
+      } }));
+      window.dispatchEvent(new CustomEvent('iconSettingsChanged', { detail: {
+        iconSize: 60,
+        iconBorderRadius: 16,
+        iconSpacing: 27,
+        showName: true,
+        nameSize: 12,
+        maxWidth: 1388
+      } }));
+      
+      alert("所有本地数据已清除！");
+    }
   };
 
   const renderWallpaperSettings = () => (
@@ -958,6 +1086,125 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     </div>
   );
 
+  const renderPersonalSettings = () => (
+    <div className="flex-1 p-6 space-y-6">
+      <div className="flex flex-col items-center justify-center space-y-6 max-w-md mx-auto">
+        {/* Logo */}
+
+        {userInfo ? (
+          <></>
+        ):(
+          <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center">
+          <span className="text-white text-2xl font-bold">Nav</span>
+        </div>
+        )}
+        
+        {!userInfo ? (
+          // 未登录状态
+          <>
+            <div className="text-center space-y-4">
+              <p className="text-white/80 text-sm">
+                登录后可享受数据同步、备份等功能
+              </p>
+              
+              <div className="flex flex-col gap-3 w-full">
+                <Button
+                  onClick={handleMockLogin}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2"
+                >
+                  立即登录
+                </Button>
+                
+                <Button
+                  onClick={handleDeleteAllData}
+                  variant="outline"
+                  className="border-red-500 text-red-400 hover:bg-red-500/10 hover:text-red-300 px-8 py-2"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  删除本地全部数据
+                </Button>
+              </div>
+            </div>
+          </>
+        ) : (
+          // 已登录状态
+          <>
+            <div className="text-center space-y-4 w-full">
+              {/* 用户头像 */}
+              <div className="w-16 h-16 rounded-full overflow-hidden mx-auto border-2 border-white/20">
+                <img
+                  src={userInfo.avatar}
+                  alt="用户头像"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              
+              {/* 用户信息 */}
+              <div className="space-y-2">
+                <h3 className="text-white text-lg font-medium">{userInfo.username}</h3>
+                <p className="text-white/60 text-sm">{userInfo.email}</p>
+                <p className="text-white/40 text-xs">登录时间：{userInfo.loginTime}</p>
+              </div>
+              
+              {/* 功能卡片 */}
+              <div className="space-y-3 w-full">
+                <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-left">
+                      <p className="text-white text-sm font-medium">数据同步</p>
+                      <p className="text-white/60 text-xs">已启用云端同步</p>
+                    </div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  </div>
+                </div>
+                
+                <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-left">
+                      <p className="text-white text-sm font-medium">自动备份</p>
+                      <p className="text-white/60 text-xs">每日自动备份设置</p>
+                    </div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  </div>
+                </div>
+                
+                <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-left">
+                      <p className="text-white text-sm font-medium">多设备同步</p>
+                      <p className="text-white/60 text-xs">已连接 2 台设备</p>
+                    </div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* 操作按钮 */}
+              <div className="flex flex-col gap-3 w-full pt-4">
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  className="border-white/20 text-white hover:bg-white/10 px-8 py-2"
+                >
+                  退出登录
+                </Button>
+                
+                <Button
+                  onClick={handleDeleteAllData}
+                  variant="outline"
+                  className="border-red-500 text-red-400 hover:bg-red-500/10 hover:text-red-300 px-8 py-2"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  删除本地全部数据
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
   const renderAboutSettings = () => (
     <div className="flex-1 p-6 space-y-6">
       <div className="space-y-6">
@@ -1041,6 +1288,8 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
 
   const renderSettingContent = () => {
     switch (selectedOption) {
+      case "personal":
+        return renderPersonalSettings();
       case "wallpaper":
         return renderWallpaperSettings();
       case "openMethod":
