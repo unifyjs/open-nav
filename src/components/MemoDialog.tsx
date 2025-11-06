@@ -226,7 +226,7 @@ export const MemoDialog = ({ open, onOpenChange }: MemoDialogProps) => {
                     className="flex-1 resize-none border-none focus:border-none text-sm outline-none 
                     hide-scrollbar
                     focus:ring-0 focus-visible:outline-none focus-visible:border-0 
-                    bg-[linear-gradient(transparent_95%,rgba(255,255,255,0.3)_95%)] 
+                    bg-[linear-gradient(transparent_95%,rgba(235,235,235,0.3)_95%)] 
                     bg-[length:100%_2rem] leading-[2rem] 
                     h-[6rem] overflow-auto transition-all"
                     style={{ minHeight: '400px' }}

@@ -108,6 +108,13 @@ All colors MUST be HSL.
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
+
+  textarea {
+    background-color: transparent;
+    &:focus-visible {
+      outline: none;
+    }
+  }
 }
 
 @layer utilities {
