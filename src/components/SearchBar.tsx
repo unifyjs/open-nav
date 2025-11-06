@@ -99,9 +99,9 @@ export const SearchBar = () => {
   if (!settings.showSearchBar) {
     return null;
   }
-
+  
   return (
-    <div className="flex justify-center px-8 mb-8">
+    <div className={`flex justify-center px-8 mb-8 ${settings.showTime?'pt-2':'pt-20'}`}>
       <form onSubmit={handleSearch} className="flex items-center bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 max-w-2xl w-full">
         {/* Search Engine Selector */}
         <Select value={selectedEngine} onValueChange={setSelectedEngine}>

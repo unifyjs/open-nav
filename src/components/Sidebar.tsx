@@ -50,6 +50,7 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
     // 监听设置变化
     const handleSettingsChange = (event: CustomEvent) => {
       setSidebarSettings(event.detail);
+      setIsVisible(!(event?.detail?.autoHide) || true);
     };
 
     window.addEventListener('sidebarSettingsChanged', handleSettingsChange as EventListener);
@@ -68,34 +69,34 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
   }, [sidebarSettings.autoHide, isHovered]);
 
   // 滚轮切换分组功能
-  useEffect(() => {
-    if (!sidebarSettings.scrollSwitch) return;
+  // useEffect(() => {
+  //   if (!sidebarSettings.scrollSwitch) return;
 
-    let scrollTimeout: NodeJS.Timeout;
-    const handleWheel = (e: WheelEvent) => {
-      // 清除之前的定时器
-      clearTimeout(scrollTimeout);
+  //   let scrollTimeout: NodeJS.Timeout;
+  //   const handleWheel = (e: WheelEvent) => {
+  //     // 清除之前的定时器
+  //     clearTimeout(scrollTimeout);
       
-      // 设置新的定时器，防止频繁触发
-      scrollTimeout = setTimeout(() => {
-        const currentIndex = categories.findIndex(cat => cat.id === currentCategory);
+  //     // 设置新的定时器，防止频繁触发
+  //     scrollTimeout = setTimeout(() => {
+  //       const currentIndex = categories.findIndex(cat => cat.id === currentCategory);
         
-        if (e.deltaY > 0 && currentIndex < categories.length - 1) {
-          // 向下滚动，切换到下一个分组
-          onCategoryChange(categories[currentIndex + 1].id);
-        } else if (e.deltaY < 0 && currentIndex > 0) {
-          // 向上滚动，切换到上一个分组
-          onCategoryChange(categories[currentIndex - 1].id);
-        }
-      }, 150); // 150ms 防抖
-    };
+  //       if (e.deltaY > 0 && currentIndex < categories.length - 1) {
+  //         // 向下滚动，切换到下一个分组
+  //         onCategoryChange(categories[currentIndex + 1].id);
+  //       } else if (e.deltaY < 0 && currentIndex > 0) {
+  //         // 向上滚动，切换到上一个分组
+  //         onCategoryChange(categories[currentIndex - 1].id);
+  //       }
+  //     }, 150); // 150ms 防抖
+  //   };
 
-    window.addEventListener('wheel', handleWheel, { passive: true });
-    return () => {
-      window.removeEventListener('wheel', handleWheel);
-      clearTimeout(scrollTimeout);
-    };
-  }, [sidebarSettings.scrollSwitch, currentCategory, onCategoryChange]);
+  //   window.addEventListener('wheel', handleWheel, { passive: true });
+  //   return () => {
+  //     window.removeEventListener('wheel', handleWheel);
+  //     clearTimeout(scrollTimeout);
+  //   };
+  // }, [sidebarSettings.scrollSwitch, currentCategory, onCategoryChange]);
 
   const sidebarStyle = {
     width: `${sidebarSettings.width}px`,
@@ -116,8 +117,8 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
         sidebarSettings.position === 'left' ? 'border-r' : 'border-l'
       )}
       style={sidebarStyle}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => setIsVisible(true)}
+      onMouseLeave={() => setIsVisible(false)}
     >
       {/* Logo */}
       <div className="p-3 border-b border-white/10">

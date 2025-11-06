@@ -119,7 +119,7 @@ const Index = () => {
       
       {/* Main Content */}
       <div 
-        className="min-h-screen flex flex-col transition-all duration-300"
+        className="min-h-screen h-screen flex flex-col transition-all duration-300"
         style={{
           marginLeft: sidebarSettings.position === 'left' ? `${sidebarSettings.width}px` : '0',
           marginRight: sidebarSettings.position === 'right' ? `${sidebarSettings.width}px` : '0'

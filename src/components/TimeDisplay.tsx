@@ -99,7 +99,7 @@ export const TimeDisplay = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center pt-10 pb-2">
+    <div className="flex flex-col items-center justify-center pt-10">
       {/* Time */}
       <div 
         className={`tracking-wider ${settings.isBold ? 'font-bold' : 'font-light'}`}

@@ -391,6 +391,8 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const toggleAutoHide = (checked: boolean) => {
     const newSettings = { ...sidebarSettings, autoHide: checked };
     saveSidebarSettings(newSettings);
+    // 触发自定义事件，通知其他组件更新
+    window.dispatchEvent(new CustomEvent('sidebarSettingsChanged', { detail: newSettings }));
   };
 
   const toggleScrollSwitch = (checked: boolean) => {

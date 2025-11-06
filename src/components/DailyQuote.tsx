@@ -49,7 +49,7 @@ export const DailyQuote = () => {
   };
 
   return (
-    <div className="flex justify-center px-8 mb-8">
+    <div className="flex justify-center px-8 mb-4">
       <div
         className="text-white/80 text-center max-w-2xl cursor-pointer hover:text-white transition-colors"
         onClick={handleClick}

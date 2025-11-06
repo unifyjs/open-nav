@@ -101,6 +101,9 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    overscroll-behavior: none;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   html {

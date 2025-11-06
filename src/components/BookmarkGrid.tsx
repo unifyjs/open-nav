@@ -378,7 +378,7 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
   };
 
   return (
-    <div className="flex-1 px-8 pb-8" style={{ maxWidth: `${iconSettings.maxWidth}px`, margin: '0 auto' }}>
+    <div className="flex-1 px-8 pb-8 max-h-[90vh] overflow-y-auto hide-scrollbar" style={{ maxWidth: `${iconSettings.maxWidth}px`, margin: '0 auto' }}>
       <div 
         ref={gridRef} 
         className="grid grid-cols-12 auto-rows-[80px] relative"
