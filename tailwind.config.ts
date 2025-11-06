@@ -92,20 +92,5 @@ export default {
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate"),
-		// 自定义工具类：hide-scrollbar（隐藏滚动条）
-		function ({ addUtilities }) {
-		  addUtilities({
-			'.hide-scrollbar': {
-			  /* Chrome, Safari, Edge */
-			  '&::-webkit-scrollbar': {
-				display: 'none',
-			  },
-			  /* Firefox */
-			  'scrollbar-width': 'none',
-			  /* IE/Edge 旧版 */
-			  '-ms-overflow-style': 'none',
-			},
-		  });
-		},],
+	plugins: [require("tailwindcss-animate")],
 } satisfies Config;

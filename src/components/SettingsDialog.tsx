@@ -1640,7 +1640,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl min-h-[90vh] max-h-[90vh] p-0 bg-slate-800/60 backdrop-blur-sm border border-white/20 text-white fixed">
-      <div className="flex h-full">
+      <div className="flex h-full max-h-[90vh]">
           {/* 左侧设置选项 */}
           <div className="w-48 border-r border-white/10 flex flex-col">
             <div className="p-4 border-b border-white/10 flex items-center justify-between">
@@ -1671,7 +1671,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
           </div>
 
           {/* 右侧设置内容 */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto hide-scrollbar">
             {renderSettingContent()}
           </div>
         </div>
