@@ -16,7 +16,12 @@ import {
   Info,
   ExternalLink,
   RefreshCw,
-  Trash2
+  Trash2,
+  Cloud,
+  CloudDownload,
+  Upload,
+  History,
+  RotateCcw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WallpaperSelectorDialog } from "./WallpaperSelectorDialog";
@@ -547,6 +552,180 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
       } }));
       
       alert("所有本地数据已清除！");
+    }
+  };
+
+  // 备份恢复功能
+  const handleCloudRestore = () => {
+    alert("功能开发中");
+  };
+
+  const handleImmediateBackup = () => {
+    alert("功能开发中");
+  };
+
+  const handleManageBackupHistory = () => {
+    alert("功能开发中");
+  };
+
+  // 导出本地数据
+  const handleExportData = () => {
+    try {
+      const exportData = {
+        wallpaperSettings: settings,
+        openMethodSettings: openMethodSettings,
+        dateTimeSettings: dateTimeSettings,
+        sidebarSettings: sidebarSettings,
+        iconSettings: iconSettings,
+        userInfo: userInfo,
+        exportTime: new Date().toISOString(),
+        version: "1.0"
+      };
+      
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `open-nav-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      URL.revokeObjectURL(url);
+      alert("数据导出成功！");
+    } catch (error) {
+      console.error("导出数据失败:", error);
+      alert("导出数据失败，请重试！");
+    }
+  };
+
+  // 导入备份文件
+  const handleImportData = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importData = JSON.parse(e.target?.result as string);
+          
+          // 验证数据格式
+          if (!importData.version) {
+            throw new Error("无效的备份文件格式");
+          }
+          
+          // 导入各项设置
+          if (importData.wallpaperSettings) {
+            setSettings(importData.wallpaperSettings);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(importData.wallpaperSettings));
+          }
+          
+          if (importData.openMethodSettings) {
+            setOpenMethodSettings(importData.openMethodSettings);
+            localStorage.setItem(OPEN_METHOD_STORAGE_KEY, JSON.stringify(importData.openMethodSettings));
+          }
+          
+          if (importData.dateTimeSettings) {
+            setDateTimeSettings(importData.dateTimeSettings);
+            localStorage.setItem(DATETIME_STORAGE_KEY, JSON.stringify(importData.dateTimeSettings));
+          }
+          
+          if (importData.sidebarSettings) {
+            setSidebarSettings(importData.sidebarSettings);
+            localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(importData.sidebarSettings));
+          }
+          
+          if (importData.iconSettings) {
+            setIconSettings(importData.iconSettings);
+            localStorage.setItem(ICON_STORAGE_KEY, JSON.stringify(importData.iconSettings));
+          }
+          
+          if (importData.userInfo) {
+            setUserInfo(importData.userInfo);
+            localStorage.setItem(USER_INFO_STORAGE_KEY, JSON.stringify(importData.userInfo));
+          }
+          
+          // 触发事件通知其他组件更新
+          window.dispatchEvent(new Event('wallpaperSettingsChanged'));
+          window.dispatchEvent(new CustomEvent('openMethodSettingsChanged', { detail: importData.openMethodSettings }));
+          window.dispatchEvent(new CustomEvent('dateTimeSettingsChanged', { detail: importData.dateTimeSettings }));
+          window.dispatchEvent(new CustomEvent('sidebarSettingsChanged', { detail: importData.sidebarSettings }));
+          window.dispatchEvent(new CustomEvent('iconSettingsChanged', { detail: importData.iconSettings }));
+          
+          alert("数据导入成功！");
+        } catch (error) {
+          console.error("导入数据失败:", error);
+          alert("导入数据失败，请检查文件格式！");
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
+  // 重置其他设置
+  const handleResetOtherSettings = () => {
+    if (window.confirm("确定要重置除图标设置外的其他设置吗？此操作不可恢复！")) {
+      // 重置除图标设置外的其他设置
+      const defaultWallpaperSettings = {
+        backgroundImage: defaultWallpapers[0],
+        maskOpacity: 0,
+        blur: 0,
+        showWindmill: true,
+        customUrl: ""
+      };
+      const defaultOpenMethodSettings = { openInNewTab: true };
+      const defaultDateTimeSettings = {
+        showTime: true,
+        showSearchBar: true,
+        showMonthDay: true,
+        showWeek: true,
+        showLunar: true,
+        show24Hour: true,
+        showSeconds: false,
+        isBold: false,
+        fontSize: 70,
+        fontColor: "#ffffff"
+      };
+      const defaultSidebarSettings = {
+        position: 'left' as const,
+        autoHide: false,
+        scrollSwitch: true,
+        width: 60,
+        opacity: 75
+      };
+      
+      setSettings(defaultWallpaperSettings);
+      setOpenMethodSettings(defaultOpenMethodSettings);
+      setDateTimeSettings(defaultDateTimeSettings);
+      setSidebarSettings(defaultSidebarSettings);
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultWallpaperSettings));
+      localStorage.setItem(OPEN_METHOD_STORAGE_KEY, JSON.stringify(defaultOpenMethodSettings));
+      localStorage.setItem(DATETIME_STORAGE_KEY, JSON.stringify(defaultDateTimeSettings));
+      localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(defaultSidebarSettings));
+      
+      // 触发事件通知其他组件更新
+      window.dispatchEvent(new Event('wallpaperSettingsChanged'));
+      window.dispatchEvent(new CustomEvent('openMethodSettingsChanged', { detail: defaultOpenMethodSettings }));
+      window.dispatchEvent(new CustomEvent('dateTimeSettingsChanged', { detail: defaultDateTimeSettings }));
+      window.dispatchEvent(new CustomEvent('sidebarSettingsChanged', { detail: defaultSidebarSettings }));
+      
+      alert("其他设置已重置！");
+    }
+  };
+
+  // 重置图标设置
+  const handleResetIconSettings = () => {
+    if (window.confirm("确定要重置图标设置吗？此操作不可恢复！")) {
+      resetIconLayout();
+      alert("图标设置已重置！");
     }
   };
 
@@ -1086,18 +1265,154 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     </div>
   );
 
+  const renderBackupSettings = () => (
+    <div className="flex-1 p-6 space-y-6">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <h3 className="text-lg font-medium text-white">备份恢复</h3>
+          <p className="text-sm text-white/60">管理您的数据备份和恢复选项</p>
+        </div>
+        
+        <div className="space-y-4">
+          {/* 云端操作 */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-white">云端操作</Label>
+            
+            {/* 从云端恢复数据 */}
+            <div 
+              className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
+              onClick={handleCloudRestore}
+            >
+              <div className="flex items-center space-x-3">
+                <CloudDownload className="w-5 h-5 text-blue-400" />
+                <div>
+                  <p className="text-white text-sm font-medium">从云端恢复数据</p>
+                  <p className="text-white/60 text-xs">从云端服务器恢复您的设置和数据</p>
+                </div>
+              </div>
+              <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+            
+            {/* 立即备份 */}
+            <div 
+              className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
+              onClick={handleImmediateBackup}
+            >
+              <div className="flex items-center space-x-3">
+                <Cloud className="w-5 h-5 text-green-400" />
+                <div>
+                  <p className="text-white text-sm font-medium">立即备份</p>
+                  <p className="text-white/60 text-xs">将当前设置备份到云端服务器</p>
+                </div>
+              </div>
+              <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+            
+            {/* 管理历史备份节点 */}
+            <div 
+              className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
+              onClick={handleManageBackupHistory}
+            >
+              <div className="flex items-center space-x-3">
+                <History className="w-5 h-5 text-purple-400" />
+                <div>
+                  <p className="text-white text-sm font-medium">管理历史备份节点</p>
+                  <p className="text-white/60 text-xs">查看和管理历史备份记录</p>
+                </div>
+              </div>
+              <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+          
+          {/* 本地数据操作 */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-white">本地数据操作</Label>
+            
+            {/* 导出本地数据 */}
+            <div 
+              className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
+              onClick={handleExportData}
+            >
+              <div className="flex items-center space-x-3">
+                <Download className="w-5 h-5 text-orange-400" />
+                <div>
+                  <p className="text-white text-sm font-medium">导出本地数据</p>
+                  <p className="text-white/60 text-xs">将当前设置导出为JSON文件</p>
+                </div>
+              </div>
+              <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+            
+            {/* 导入备份文件 */}
+            <div 
+              className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
+              onClick={handleImportData}
+            >
+              <div className="flex items-center space-x-3">
+                <Upload className="w-5 h-5 text-cyan-400" />
+                <div>
+                  <p className="text-white text-sm font-medium">导入备份文件</p>
+                  <p className="text-white/60 text-xs">从本地JSON文件恢复设置</p>
+                </div>
+              </div>
+              <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+          
+          {/* 重置设置 */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-white">重置设置</Label>
+            
+            <div className="grid grid-cols-1 gap-3">
+              {/* 重置其他设置 */}
+              <Button
+                onClick={handleResetOtherSettings}
+                variant="outline"
+                className="border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-400 flex items-center justify-center gap-2 p-4 h-auto"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <div className="text-left">
+                  <p className="text-sm font-medium">重置其他设置</p>
+                  <p className="text-xs opacity-80">重置除图标设置外的其他配置</p>
+                </div>
+              </Button>
+              
+              {/* 重置图标设置 */}
+              <Button
+                onClick={handleResetIconSettings}
+                variant="outline"
+                className="border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-400 flex items-center justify-center gap-2 p-4 h-auto"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <div className="text-left">
+                  <p className="text-sm font-medium">重置图标设置</p>
+                  <p className="text-xs opacity-80">将图标相关设置恢复到默认状态</p>
+                </div>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderPersonalSettings = () => (
     <div className="flex-1 p-6 space-y-6">
       <div className="flex flex-col items-center justify-center space-y-6 max-w-md mx-auto">
         {/* Logo */}
-
-        {userInfo ? (
-          <></>
-        ):(
-          <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center">
-          <span className="text-white text-2xl font-bold">Nav</span>
+        <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center">
+          <span className="text-white text-2xl font-bold">B</span>
         </div>
-        )}
         
         {!userInfo ? (
           // 未登录状态
@@ -1300,6 +1615,8 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         return renderSidebarSettings();
       case "icons":
         return renderIconSettings();
+      case "backup":
+        return renderBackupSettings();
       case "about":
         return renderAboutSettings();
       default:
