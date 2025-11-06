@@ -59,6 +59,15 @@ interface SidebarSettings {
   opacity: number;
 }
 
+interface IconSettings {
+  iconSize: number;
+  iconBorderRadius: number;
+  iconSpacing: number;
+  showName: boolean;
+  nameSize: number;
+  maxWidth: number;
+}
+
 const settingsOptions = [
   { id: "personal", label: "个人信息", icon: User },
   { id: "wallpaper", label: "壁纸", icon: ImageIcon },
@@ -84,6 +93,7 @@ const STORAGE_KEY = "wallpaper_settings";
 const OPEN_METHOD_STORAGE_KEY = "open_method_settings";
 const DATETIME_STORAGE_KEY = "datetime_settings";
 const SIDEBAR_STORAGE_KEY = "sidebar_settings";
+const ICON_STORAGE_KEY = "icon_settings";
 
 export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const [selectedOption, setSelectedOption] = useState("wallpaper");
@@ -118,6 +128,14 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     scrollSwitch: true,
     width: 60,
     opacity: 75
+  });
+  const [iconSettings, setIconSettings] = useState<IconSettings>({
+    iconSize: 60,
+    iconBorderRadius: 16,
+    iconSpacing: 27,
+    showName: true,
+    nameSize: 12,
+    maxWidth: 1388
   });
 
   // 从 localStorage 加载设置
@@ -164,6 +182,17 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         console.error("Failed to parse sidebar settings:", error);
       }
     }
+    
+    // 加载图标设置
+    const savedIconSettings = localStorage.getItem(ICON_STORAGE_KEY);
+    if (savedIconSettings) {
+      try {
+        const parsed = JSON.parse(savedIconSettings);
+        setIconSettings(parsed);
+      } catch (error) {
+        console.error("Failed to parse icon settings:", error);
+      }
+    }
   }, []);
 
   // 保存设置到 localStorage
@@ -200,6 +229,15 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     
     // 触发自定义事件，通知其他组件更新
     window.dispatchEvent(new CustomEvent('sidebarSettingsChanged', { detail: newSettings }));
+  };
+
+  // 保存图标设置到 localStorage
+  const saveIconSettings = (newSettings: IconSettings) => {
+    setIconSettings(newSettings);
+    localStorage.setItem(ICON_STORAGE_KEY, JSON.stringify(newSettings));
+    
+    // 触发自定义事件，通知其他组件更新
+    window.dispatchEvent(new CustomEvent('iconSettingsChanged', { detail: newSettings }));
   };
 
   // 切换新标签页打开设置
@@ -339,6 +377,49 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const updateSidebarOpacity = (value: number[]) => {
     const newSettings = { ...sidebarSettings, opacity: value[0] };
     saveSidebarSettings(newSettings);
+  };
+
+  // 图标设置处理函数
+  const updateIconSize = (value: number[]) => {
+    const newSettings = { ...iconSettings, iconSize: value[0] };
+    saveIconSettings(newSettings);
+  };
+
+  const updateIconBorderRadius = (value: number[]) => {
+    const newSettings = { ...iconSettings, iconBorderRadius: value[0] };
+    saveIconSettings(newSettings);
+  };
+
+  const updateIconSpacing = (value: number[]) => {
+    const newSettings = { ...iconSettings, iconSpacing: value[0] };
+    saveIconSettings(newSettings);
+  };
+
+  const toggleShowName = (checked: boolean) => {
+    const newSettings = { ...iconSettings, showName: checked };
+    saveIconSettings(newSettings);
+  };
+
+  const updateNameSize = (value: number[]) => {
+    const newSettings = { ...iconSettings, nameSize: value[0] };
+    saveIconSettings(newSettings);
+  };
+
+  const updateMaxWidth = (value: number[]) => {
+    const newSettings = { ...iconSettings, maxWidth: value[0] };
+    saveIconSettings(newSettings);
+  };
+
+  const resetIconLayout = () => {
+    const defaultSettings: IconSettings = {
+      iconSize: 60,
+      iconBorderRadius: 16,
+      iconSpacing: 27,
+      showName: true,
+      nameSize: 12,
+      maxWidth: 1388
+    };
+    saveIconSettings(defaultSettings);
   };
 
   const renderWallpaperSettings = () => (
@@ -765,6 +846,118 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     </div>
   );
 
+  const renderIconSettings = () => (
+    <div className="flex-1 p-6 space-y-6">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <h3 className="text-lg font-medium text-white">图标设置</h3>
+          <p className="text-sm text-white/60">配置首页图标的大小、间距和显示选项</p>
+        </div>
+        
+        <div className="space-y-6">
+          {/* 图标大小 */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-white">
+              图标大小: {iconSettings.iconSize}px
+            </Label>
+            <Slider
+              value={[iconSettings.iconSize]}
+              onValueChange={updateIconSize}
+              max={100}
+              min={30}
+              step={1}
+              className="w-full"
+            />
+          </div>
+
+          {/* 图标圆角 */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-white">
+              图标圆角: {iconSettings.iconBorderRadius}px
+            </Label>
+            <Slider
+              value={[iconSettings.iconBorderRadius]}
+              onValueChange={updateIconBorderRadius}
+              max={30}
+              min={0}
+              step={1}
+              className="w-full"
+            />
+          </div>
+
+          {/* 图标间距 */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-white">
+              图标间距: {iconSettings.iconSpacing}px
+            </Label>
+            <Slider
+              value={[iconSettings.iconSpacing]}
+              onValueChange={updateIconSpacing}
+              max={50}
+              min={10}
+              step={1}
+              className="w-full"
+            />
+          </div>
+
+          {/* 显示名称开关 */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-white">显示名称</Label>
+              <p className="text-xs text-white/60">控制图标下方名称的显示和隐藏</p>
+            </div>
+            <Switch
+              checked={iconSettings.showName}
+              onCheckedChange={toggleShowName}
+            />
+          </div>
+
+          {/* 名称大小 */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-white">
+              名称大小: {iconSettings.nameSize}px
+            </Label>
+            <Slider
+              value={[iconSettings.nameSize]}
+              onValueChange={updateNameSize}
+              max={20}
+              min={8}
+              step={1}
+              className="w-full"
+            />
+          </div>
+
+          {/* 最大宽度 */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-white">
+              最大宽度: {iconSettings.maxWidth}px
+            </Label>
+            <Slider
+              value={[iconSettings.maxWidth]}
+              onValueChange={updateMaxWidth}
+              max={2000}
+              min={800}
+              step={10}
+              className="w-full"
+            />
+          </div>
+
+          {/* 重置按钮 */}
+          <div className="pt-4">
+            <Button
+              onClick={resetIconLayout}
+              variant="outline"
+              className="border-white/20 text-white hover:bg-white/10 flex items-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              重置图标布局
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderSettingContent = () => {
     switch (selectedOption) {
       case "wallpaper":
@@ -775,6 +968,8 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         return renderDateTimeSettings();
       case "sidebar":
         return renderSidebarSettings();
+      case "icons":
+        return renderIconSettings();
       default:
         return (
           <div className="flex-1 p-6 flex items-center justify-center">

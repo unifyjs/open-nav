@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { GripVertical } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface BookmarkItemProps {
   title: string;
@@ -14,7 +15,52 @@ interface BookmarkItemProps {
   onClick?: (e: React.MouseEvent) => void;
 }
 
+interface IconSettings {
+  iconSize: number;
+  iconBorderRadius: number;
+  iconSpacing: number;
+  showName: boolean;
+  nameSize: number;
+  maxWidth: number;
+}
+
 export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging = false, openInNewTab = true, onDragStart, onDragEnd, onClick }: BookmarkItemProps) => {
+  const [iconSettings, setIconSettings] = useState<IconSettings>({
+    iconSize: 60,
+    iconBorderRadius: 16,
+    iconSpacing: 27,
+    showName: true,
+    nameSize: 12,
+    maxWidth: 1388
+  });
+
+  // 加载图标设置
+  useEffect(() => {
+    const loadIconSettings = () => {
+      const savedIconSettings = localStorage.getItem('icon_settings');
+      if (savedIconSettings) {
+        try {
+          const parsed = JSON.parse(savedIconSettings);
+          setIconSettings(parsed);
+        } catch (error) {
+          console.error("Failed to parse icon settings:", error);
+        }
+      }
+    };
+    
+    loadIconSettings();
+    
+    // 监听图标设置变化
+    const handleIconSettingsChange = (event: CustomEvent) => {
+      setIconSettings(event.detail);
+    };
+    
+    window.addEventListener('iconSettingsChanged', handleIconSettingsChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('iconSettingsChanged', handleIconSettingsChange as EventListener);
+    };
+  }, []);
   const getGridSpan = (size: string) => {
     switch (size) {
       case "1x1": return "col-span-1 row-span-1";
@@ -67,27 +113,41 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging
         onDragEnd={onDragEnd}
       >
         <div 
-          className="w-14 h-14 rounded-xl flex items-center justify-center mb-0 overflow-hidden"
-          style={{ backgroundColor: color }}
+          className="flex items-center justify-center mb-0 overflow-hidden"
+          style={{ 
+            backgroundColor: color,
+            width: `${iconSettings.iconSize}px`,
+            height: `${iconSettings.iconSize}px`,
+            borderRadius: `${iconSettings.iconBorderRadius}px`
+          }}
         >
           <img 
             src={icon} 
             alt={title}
-            className="w-8 h-8 object-contain"
+            className="object-contain"
+            style={{
+              width: `${iconSettings.iconSize * 0.6}px`,
+              height: `${iconSettings.iconSize * 0.6}px`
+            }}
             onError={(e) => {
               // Fallback to a simple colored square with first letter
               const target = e.target as HTMLImageElement;
               target.style.display = 'none';
               const parent = target.parentElement;
               if (parent) {
-                parent.innerHTML = `<span class="text-white font-bold text-lg">${title.charAt(0)}</span>`;
+                parent.innerHTML = `<span class="text-white font-bold" style="font-size: ${iconSettings.iconSize * 0.3}px">${title.charAt(0)}</span>`;
               }
             }}
           />
         </div>
-        <span className="text-white text-xs text-center leading-tight px-1 line-clamp-2">
-          {title}
-        </span>
+        {iconSettings.showName && (
+          <span 
+            className="text-white text-center leading-tight px-1 line-clamp-2"
+            style={{ fontSize: `${iconSettings.nameSize}px` }}
+          >
+            {title}
+          </span>
+        )}
       </Button>
       
       {/* Drag Handle - visible on hover */}

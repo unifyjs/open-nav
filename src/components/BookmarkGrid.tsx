@@ -19,6 +19,15 @@ interface GridItem {
   order?: number;
 }
 
+interface IconSettings {
+  iconSize: number;
+  iconBorderRadius: number;
+  iconSpacing: number;
+  showName: boolean;
+  nameSize: number;
+  maxWidth: number;
+}
+
 // 默认书签数据
 const defaultBookmarkData: Record<string, GridItem[]> = {
   主页: [
@@ -123,6 +132,14 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
   const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [openInNewTab, setOpenInNewTab] = useState(true); // 默认在新标签页打开
+  const [iconSettings, setIconSettings] = useState<IconSettings>({
+    iconSize: 60,
+    iconBorderRadius: 16,
+    iconSpacing: 27,
+    showName: true,
+    nameSize: 12,
+    maxWidth: 1388
+  });
   const [contextMenu, setContextMenu] = useState<{
     show: boolean;
     x: number;
@@ -164,15 +181,37 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
     
     loadOpenMethodSettings();
     
+    // 加载图标设置
+    const loadIconSettings = () => {
+      const savedIconSettings = localStorage.getItem('icon_settings');
+      if (savedIconSettings) {
+        try {
+          const parsed = JSON.parse(savedIconSettings);
+          setIconSettings(parsed);
+        } catch (error) {
+          console.error("Failed to parse icon settings:", error);
+        }
+      }
+    };
+    
+    loadIconSettings();
+    
     // 监听打开方式设置变化
     const handleOpenMethodSettingsChange = (event: CustomEvent) => {
       setOpenInNewTab(event.detail.openInNewTab ?? true);
     };
     
+    // 监听图标设置变化
+    const handleIconSettingsChange = (event: CustomEvent) => {
+      setIconSettings(event.detail);
+    };
+    
     window.addEventListener('openMethodSettingsChanged', handleOpenMethodSettingsChange as EventListener);
+    window.addEventListener('iconSettingsChanged', handleIconSettingsChange as EventListener);
     
     return () => {
       window.removeEventListener('openMethodSettingsChanged', handleOpenMethodSettingsChange as EventListener);
+      window.removeEventListener('iconSettingsChanged', handleIconSettingsChange as EventListener);
     };
   }, [category]);
 
@@ -339,8 +378,12 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
   };
 
   return (
-    <div className="flex-1 px-8 pb-8">
-      <div ref={gridRef} className="grid grid-cols-12 gap-6 auto-rows-[80px] relative">
+    <div className="flex-1 px-8 pb-8" style={{ maxWidth: `${iconSettings.maxWidth}px`, margin: '0 auto' }}>
+      <div 
+        ref={gridRef} 
+        className="grid grid-cols-12 auto-rows-[80px] relative"
+        style={{ gap: `${iconSettings.iconSpacing}px` }}
+      >
         {items.map((item, index) => {
           const isDraggedOver = draggedOverIndex === index;
           const isDragging = draggedItem?.id === item.id;
