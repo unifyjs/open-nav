@@ -671,6 +671,17 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     input.click();
   };
 
+  // 恢复默认分组
+  const handleRestoreDefaultCategories = () => {
+    if (window.confirm("确定要恢复所有默认分组吗？这将恢复所有被编辑或隐藏的默认分组。")) {
+      // 发送事件通知Sidebar组件恢复默认分组
+      window.dispatchEvent(new CustomEvent('restoreDefaultCategories'));
+      
+      // 显示成功消息
+      alert('默认分组已恢复！');
+    }
+  };
+
   // 重置其他设置
   const handleResetOtherSettings = () => {
     if (window.confirm("确定要重置除图标设置外的其他设置吗？此操作不可恢复！")) {
@@ -1376,6 +1387,19 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
             <Label className="text-sm font-medium text-white">重置设置</Label>
             
             <div className="grid grid-cols-1 gap-3">
+              {/* 恢复默认分组 */}
+              <Button
+                onClick={handleRestoreDefaultCategories}
+                variant="outline"
+                className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 hover:border-blue-400 flex items-center justify-center gap-2 p-4 h-auto"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <div className="text-left">
+                  <p className="text-sm font-medium">恢复默认分组</p>
+                  <p className="text-xs opacity-80">恢复所有被编辑或隐藏的默认分组</p>
+                </div>
+              </Button>
+              
               {/* 重置其他设置 */}
               <Button
                 onClick={handleResetOtherSettings}

@@ -42,6 +42,7 @@ interface Category {
   label: string;
   icon: string;
   isCustom?: boolean;
+  isEdited?: boolean;
 }
 
 const defaultCategories: Category[] = [
@@ -87,16 +88,32 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
       }
     }
 
+    // 加载自定义分组和处理默认分组的编辑/隐藏状态
+    let processedCategories = [...defaultCategories];
+    
+    // 处理隐藏的默认分组
+    const hiddenDefaults = JSON.parse(localStorage.getItem('hidden_default_categories') || '[]');
+    processedCategories = processedCategories.filter(cat => !hiddenDefaults.includes(cat.id));
+    
+    // 处理编辑过的默认分组
+    const editedDefaults = JSON.parse(localStorage.getItem('edited_default_categories') || '[]');
+    processedCategories = processedCategories.map(cat => {
+      const edited = editedDefaults.find((editedCat: any) => editedCat.id === cat.id);
+      return edited ? { ...cat, label: edited.label, icon: edited.icon, isEdited: true } : cat;
+    });
+    
     // 加载自定义分组
     const savedCategories = localStorage.getItem('custom_categories');
     if (savedCategories) {
       try {
         const parsed = JSON.parse(savedCategories);
-        setCategories([...defaultCategories, ...parsed]);
+        processedCategories = [...processedCategories, ...parsed];
       } catch (error) {
         console.error('Failed to parse custom categories:', error);
       }
     }
+    
+    setCategories(processedCategories);
 
     // 监听设置变化
     const handleSettingsChange = (event: CustomEvent) => {
@@ -104,9 +121,16 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
       setIsVisible(!(event?.detail?.autoHide) || true);
     };
 
+    // 监听恢复默认分组事件
+    const handleRestoreDefaults = () => {
+      restoreDefaultCategories();
+    };
+
     window.addEventListener('sidebarSettingsChanged', handleSettingsChange as EventListener);
+    window.addEventListener('restoreDefaultCategories', handleRestoreDefaults as EventListener);
     return () => {
       window.removeEventListener('sidebarSettingsChanged', handleSettingsChange as EventListener);
+      window.removeEventListener('restoreDefaultCategories', handleRestoreDefaults as EventListener);
     };
   }, []);
 
@@ -133,18 +157,42 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
   const handleEditGroup = (group: { id: string; name: string; icon: string }) => {
     const newCategories = categories.map(cat => 
       cat.id === group.id 
-        ? { ...cat, label: group.name, icon: group.icon }
+        ? { ...cat, label: group.name, icon: group.icon, isEdited: !cat.isCustom }
         : cat
     );
     setCategories(newCategories);
     saveCustomCategories(newCategories);
+    
+    // 如果是默认分组，保存编辑状态
+    if (!categories.find(cat => cat.id === group.id)?.isCustom) {
+      const editedDefaults = JSON.parse(localStorage.getItem('edited_default_categories') || '[]');
+      const updatedEditedDefaults = editedDefaults.filter((cat: any) => cat.id !== group.id);
+      updatedEditedDefaults.push({ id: group.id, label: group.name, icon: group.icon });
+      localStorage.setItem('edited_default_categories', JSON.stringify(updatedEditedDefaults));
+    }
   };
 
   // 删除分组
   const handleDeleteGroup = (id: string) => {
-    const newCategories = categories.filter(cat => cat.id !== id);
-    setCategories(newCategories);
-    saveCustomCategories(newCategories);
+    const category = categories.find(cat => cat.id === id);
+    
+    if (category?.isCustom) {
+      // 删除自定义分组
+      const newCategories = categories.filter(cat => cat.id !== id);
+      setCategories(newCategories);
+      saveCustomCategories(newCategories);
+    } else {
+      // 隐藏默认分组
+      const newCategories = categories.filter(cat => cat.id !== id);
+      setCategories(newCategories);
+      
+      // 保存隐藏的默认分组
+      const hiddenDefaults = JSON.parse(localStorage.getItem('hidden_default_categories') || '[]');
+      if (!hiddenDefaults.includes(id)) {
+        hiddenDefaults.push(id);
+        localStorage.setItem('hidden_default_categories', JSON.stringify(hiddenDefaults));
+      }
+    }
     
     // 如果删除的是当前选中的分组，切换到主页
     if (currentCategory === id) {
@@ -152,11 +200,31 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
     }
   };
 
+  // 恢复默认分组
+  const restoreDefaultCategories = () => {
+    // 清除隐藏和编辑状态
+    localStorage.removeItem('hidden_default_categories');
+    localStorage.removeItem('edited_default_categories');
+    
+    // 重新加载分组
+    const savedCategories = localStorage.getItem('custom_categories');
+    let customCategories = [];
+    if (savedCategories) {
+      try {
+        customCategories = JSON.parse(savedCategories);
+      } catch (error) {
+        console.error('Failed to parse custom categories:', error);
+      }
+    }
+    
+    setCategories([...defaultCategories, ...customCategories]);
+  };
+
   // 处理右键菜单
   const handleContextMenu = (e: React.MouseEvent, categoryId: string) => {
     e.preventDefault();
     const category = categories.find(cat => cat.id === categoryId);
-    if (category && category.isCustom) {
+    if (category) {
       setContextMenu({
         visible: true,
         x: e.clientX,
@@ -172,6 +240,13 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
     if (category) {
       setEditingGroup(category);
       setEditGroupOpen(true);
+    }
+  };
+
+  // 处理右键菜单删除
+  const handleDeleteClick = () => {
+    if (contextMenu.categoryId) {
+      handleDeleteGroup(contextMenu.categoryId);
     }
   };
 
@@ -345,6 +420,7 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
         x={contextMenu.x}
         y={contextMenu.y}
         onEdit={handleEditClick}
+        onDelete={handleDeleteClick}
         onClose={() => setContextMenu({ visible: false, x: 0, y: 0, categoryId: "" })}
       />
     </div>

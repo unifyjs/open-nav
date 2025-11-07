@@ -6,10 +6,11 @@ interface ContextMenuProps {
   x: number;
   y: number;
   onEdit: () => void;
+  onDelete: () => void;
   onClose: () => void;
 }
 
-export const ContextMenu = ({ visible, x, y, onEdit, onClose }: ContextMenuProps) => {
+export const ContextMenu = ({ visible, x, y, onEdit, onDelete, onClose }: ContextMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -57,6 +58,15 @@ export const ContextMenu = ({ visible, x, y, onEdit, onClose }: ContextMenuProps
         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors"
       >
         编辑分组
+      </button>
+      <button
+        onClick={() => {
+          onDelete();
+          onClose();
+        }}
+        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors"
+      >
+        删除分组
       </button>
     </div>
   );

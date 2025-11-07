@@ -233,10 +233,10 @@ export const AddComponentDialog = ({ open, onOpenChange, onAddComponent }: AddCo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+      <DialogContent className="max-w-4xl max-h-[100vh] p-0">
         <div className="flex flex-col h-[80vh]">
           {/* Header */}
-          <DialogHeader className="p-6 border-b">
+          <DialogHeader className="p-3 border-b">
             <div className="flex items-center justify-between">
               <DialogTitle className="text-xl font-semibold">添加组件</DialogTitle>
             </div>
@@ -244,7 +244,7 @@ export const AddComponentDialog = ({ open, onOpenChange, onAddComponent }: AddCo
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 mt-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="components">组件库</TabsTrigger>
               <TabsTrigger value="navigation">网址导航</TabsTrigger>
               <TabsTrigger value="custom">自定义图标</TabsTrigger>
@@ -272,7 +272,7 @@ export const AddComponentDialog = ({ open, onOpenChange, onAddComponent }: AddCo
               </div>
 
               {/* Components Grid */}
-              <div className="flex-1 p-6 overflow-y-auto">
+              <div className="flex-1 p-6 hide-scrollbar max-h-[50vh] overflow-y-auto">
                 <div className="grid grid-cols-2 gap-4">
                   {filteredComponents.map((component) => (
                     <div
@@ -310,7 +310,7 @@ export const AddComponentDialog = ({ open, onOpenChange, onAddComponent }: AddCo
 
             <TabsContent value="navigation" className="flex-1 flex flex-col mt-0">
               {/* Search Bar */}
-              <div className="px-6 py-4 border-b">
+              <div className="px-0 py-1 border-b">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
@@ -343,7 +343,7 @@ export const AddComponentDialog = ({ open, onOpenChange, onAddComponent }: AddCo
               </div>
 
               {/* Websites Grid */}
-              <div className="flex-1 p-6 overflow-y-auto">
+              <div className="flex-1 p-6 hide-scrollbar max-h-[40vh]  overflow-y-auto">
                 <div className="grid grid-cols-2 gap-4">
                   {filteredWebsites.map((website) => (
                     <div

@@ -163,7 +163,22 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
       }
     } else {
       const defaultItems = defaultBookmarkData[category as keyof typeof defaultBookmarkData] || [];
-      setItems(defaultItems);
+      // 如果是新分组且没有默认数据，添加默认的“添加图标”项
+      if (defaultItems.length === 0) {
+        const addItem: GridItem = {
+          type: "bookmark",
+          id: "add",
+          title: "添加图标",
+          icon: "https://oss.nbtab.com/public/admin/website/7319643153289458-0.svg",
+          url: "#",
+          color: "#ffffff",
+          size: "1x1",
+          order: 0
+        };
+        setItems([addItem]);
+      } else {
+        setItems(defaultItems);
+      }
     }
     
     // 加载打开方式设置
