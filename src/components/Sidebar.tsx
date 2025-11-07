@@ -1,30 +1,70 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Home, Bot, Coffee, Code, Palette, Megaphone, Plus, Settings } from "lucide-react";
+import { 
+  Home, Bot, Coffee, Code, Palette, Megaphone, Plus, Settings,
+  Heart, Star, ShoppingCart, Music, Camera, 
+  Gamepad2, Wallet, ThumbsUp, Play, Circle,
+  Square, Triangle, Diamond, Hexagon, Octagon,
+  Bookmark, Tag, Flag, Bell, Mail, Phone,
+  Calendar, Clock, Map, Compass, Globe, Wifi
+} from "lucide-react";
 import { SettingsDialog } from "@/components/SettingsDialog";
+import { AddGroupDialog } from "@/components/AddGroupDialog";
+import { EditGroupDialog } from "@/components/EditGroupDialog";
+import { ContextMenu } from "@/components/ContextMenu";
 
 interface SidebarProps {
   currentCategory: string;
   onCategoryChange: (category: string) => void;
 }
 
-interface SidebarProps {
-  currentCategory: string;
-  onCategoryChange: (category: string) => void;
+interface SidebarSettings {
+  position: 'left' | 'right';
+  autoHide: boolean;
+  scrollSwitch: boolean;
+  width: number;
+  opacity: number;
 }
 
-const categories = [
-  { id: "主页", label: "主页", icon: Home },
-  { id: "AI", label: "AI", icon: Bot },
-  { id: "摸鱼", label: "摸鱼", icon: Coffee },
-  { id: "开发", label: "开发", icon: Code },
-  { id: "设计", label: "设计", icon: Palette },
-  { id: "新媒体", label: "新媒体", icon: Megaphone },
+// 图标映射
+const iconMap = {
+  Home, Bot, Coffee, Code, Palette, Megaphone,
+  Heart, Star, ShoppingCart, Music, Camera, 
+  Gamepad2, Wallet, ThumbsUp, Play, Circle,
+  Square, Triangle, Diamond, Hexagon, Octagon,
+  Bookmark, Tag, Flag, Bell, Mail, Phone,
+  Calendar, Clock, Map, Compass, Globe, Wifi
+};
+
+interface Category {
+  id: string;
+  label: string;
+  icon: string;
+  isCustom?: boolean;
+}
+
+const defaultCategories: Category[] = [
+  { id: "主页", label: "主页", icon: "Home" },
+  { id: "AI", label: "AI", icon: "Bot" },
+  { id: "摸鱼", label: "摸鱼", icon: "Coffee" },
+  { id: "开发", label: "开发", icon: "Code" },
+  { id: "设计", label: "设计", icon: "Palette" },
+  { id: "新媒体", label: "新媒体", icon: "Megaphone" },
 ];
 
 export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [addGroupOpen, setAddGroupOpen] = useState(false);
+  const [editGroupOpen, setEditGroupOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>(defaultCategories);
+  const [contextMenu, setContextMenu] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    categoryId: string;
+  }>({ visible: false, x: 0, y: 0, categoryId: "" });
+  const [editingGroup, setEditingGroup] = useState<Category | null>(null);
   const [sidebarSettings, setSidebarSettings] = useState<SidebarSettings>({
     position: 'left',
     autoHide: false,
@@ -35,7 +75,7 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
   const [isVisible, setIsVisible] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
 
-  // 加载侧边栏设置
+  // 加载侧边栏设置和分组数据
   useEffect(() => {
     const savedSettings = localStorage.getItem('sidebar_settings');
     if (savedSettings) {
@@ -44,6 +84,17 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
         setSidebarSettings(parsed);
       } catch (error) {
         console.error('Failed to parse sidebar settings:', error);
+      }
+    }
+
+    // 加载自定义分组
+    const savedCategories = localStorage.getItem('custom_categories');
+    if (savedCategories) {
+      try {
+        const parsed = JSON.parse(savedCategories);
+        setCategories([...defaultCategories, ...parsed]);
+      } catch (error) {
+        console.error('Failed to parse custom categories:', error);
       }
     }
 
@@ -58,6 +109,71 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
       window.removeEventListener('sidebarSettingsChanged', handleSettingsChange as EventListener);
     };
   }, []);
+
+  // 保存自定义分组到localStorage
+  const saveCustomCategories = (newCategories: Category[]) => {
+    const customCategories = newCategories.filter(cat => cat.isCustom);
+    localStorage.setItem('custom_categories', JSON.stringify(customCategories));
+  };
+
+  // 添加新分组
+  const handleAddGroup = (group: { name: string; icon: string }) => {
+    const newCategory: Category = {
+      id: `custom_${Date.now()}`,
+      label: group.name,
+      icon: group.icon,
+      isCustom: true
+    };
+    const newCategories = [...categories, newCategory];
+    setCategories(newCategories);
+    saveCustomCategories(newCategories);
+  };
+
+  // 编辑分组
+  const handleEditGroup = (group: { id: string; name: string; icon: string }) => {
+    const newCategories = categories.map(cat => 
+      cat.id === group.id 
+        ? { ...cat, label: group.name, icon: group.icon }
+        : cat
+    );
+    setCategories(newCategories);
+    saveCustomCategories(newCategories);
+  };
+
+  // 删除分组
+  const handleDeleteGroup = (id: string) => {
+    const newCategories = categories.filter(cat => cat.id !== id);
+    setCategories(newCategories);
+    saveCustomCategories(newCategories);
+    
+    // 如果删除的是当前选中的分组，切换到主页
+    if (currentCategory === id) {
+      onCategoryChange("主页");
+    }
+  };
+
+  // 处理右键菜单
+  const handleContextMenu = (e: React.MouseEvent, categoryId: string) => {
+    e.preventDefault();
+    const category = categories.find(cat => cat.id === categoryId);
+    if (category && category.isCustom) {
+      setContextMenu({
+        visible: true,
+        x: e.clientX,
+        y: e.clientY,
+        categoryId
+      });
+    }
+  };
+
+  // 打开编辑对话框
+  const handleEditClick = () => {
+    const category = categories.find(cat => cat.id === contextMenu.categoryId);
+    if (category) {
+      setEditingGroup(category);
+      setEditGroupOpen(true);
+    }
+  };
 
   // 自动隐藏逻辑
   useEffect(() => {
@@ -131,7 +247,7 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
       {/* Categories */}
       <div className="flex-1 py-4">
         {categories.map((category) => {
-          const Icon = category.icon;
+          const IconComponent = iconMap[category.icon as keyof typeof iconMap] || Home;
           const isActive = currentCategory === category.id;
           
           return (
@@ -144,8 +260,9 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
                   isActive && "text-white bg-white/20"
                 )}
                 onClick={() => onCategoryChange(category.id)}
+                onContextMenu={(e) => handleContextMenu(e, category.id)}
               >
-                <Icon className="w-5 h-5 mb-1" />
+                <IconComponent className="w-5 h-5 mb-1" />
               </Button>
               
               {/* Category Label */}
@@ -165,6 +282,7 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
             variant="ghost"
             size="sm"
             className="w-full h-12 p-0 flex flex-col items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            onClick={() => setAddGroupOpen(true)}
           >
             <Plus className="w-5 h-5" />
           </Button>
@@ -203,6 +321,31 @@ export const Sidebar = ({ currentCategory, onCategoryChange }: SidebarProps) => 
       <SettingsDialog 
         open={settingsOpen} 
         onOpenChange={setSettingsOpen} 
+      />
+      
+      {/* Add Group Dialog */}
+      <AddGroupDialog
+        open={addGroupOpen}
+        onOpenChange={setAddGroupOpen}
+        onAddGroup={handleAddGroup}
+      />
+      
+      {/* Edit Group Dialog */}
+      <EditGroupDialog
+        open={editGroupOpen}
+        onOpenChange={setEditGroupOpen}
+        onEditGroup={handleEditGroup}
+        onDeleteGroup={handleDeleteGroup}
+        group={editingGroup}
+      />
+      
+      {/* Context Menu */}
+      <ContextMenu
+        visible={contextMenu.visible}
+        x={contextMenu.x}
+        y={contextMenu.y}
+        onEdit={handleEditClick}
+        onClose={() => setContextMenu({ visible: false, x: 0, y: 0, categoryId: "" })}
       />
     </div>
   );
