@@ -10,11 +10,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { X, Plus, Search } from "lucide-react";
+import { CustomIconForm, CustomIconData } from "@/components/CustomIconForm";
+import { toast } from "@/hooks/use-toast";
+import { CustomIconStorage } from "@/lib/customIconStorage";
 
 interface AddComponentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAddComponent: (component: ComponentItem) => void;
+  currentGroupId?: string;
 }
 
 interface ComponentItem {
@@ -176,7 +180,7 @@ interface WebsiteData {
   }[];
 }
 
-export const AddComponentDialog = ({ open, onOpenChange, onAddComponent }: AddComponentDialogProps) => {
+export const AddComponentDialog = ({ open, onOpenChange, onAddComponent, currentGroupId = "主页" }: AddComponentDialogProps) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [activeTab, setActiveTab] = useState("components");
   const [searchQuery, setSearchQuery] = useState("");
@@ -229,6 +233,72 @@ export const AddComponentDialog = ({ open, onOpenChange, onAddComponent }: AddCo
       type: "bookmark"
     };
     onAddComponent(componentItem);
+  };
+
+  // 保存自定义图标到localStorage
+  const saveCustomIconToStorage = (iconData: CustomIconData) => {
+    try {
+      CustomIconStorage.saveIcon(iconData);
+    } catch (error) {
+      console.error('Failed to save custom icon:', error);
+      toast({
+        title: "保存失败",
+        description: "保存自定义图标失败，请重试",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  // 处理自定义图标保存
+  const handleCustomIconSave = (iconData: CustomIconData) => {
+    // 保存到localStorage
+    saveCustomIconToStorage(iconData);
+    
+    // 转换为ComponentItem格式并添加到组件
+    const componentItem: ComponentItem = {
+      id: iconData.id,
+      title: iconData.name,
+      description: `自定义图标 - ${iconData.name}`,
+      icon: iconData.iconType === 'text' ? iconData.iconText : (iconData.favicon || iconData.name.charAt(0)),
+      color: iconData.backgroundColor,
+      url: iconData.url,
+      category: iconData.groupId,
+      type: "bookmark"
+    };
+    
+    onAddComponent(componentItem);
+    onOpenChange(false);
+    
+    toast({
+      title: "保存成功",
+      description: `自定义图标 "${iconData.name}" 已添加到 "${iconData.groupId}" 分组`,
+    });
+  };
+
+  // 处理自定义图标保存并继续
+  const handleCustomIconSaveAndContinue = (iconData: CustomIconData) => {
+    // 保存到localStorage
+    saveCustomIconToStorage(iconData);
+    
+    // 转换为ComponentItem格式并添加到组件
+    const componentItem: ComponentItem = {
+      id: iconData.id,
+      title: iconData.name,
+      description: `自定义图标 - ${iconData.name}`,
+      icon: iconData.iconType === 'text' ? iconData.iconText : (iconData.favicon || iconData.name.charAt(0)),
+      color: iconData.backgroundColor,
+      url: iconData.url,
+      category: iconData.groupId,
+      type: "bookmark"
+    };
+    
+    onAddComponent(componentItem);
+    
+    toast({
+      title: "保存成功",
+      description: `自定义图标 "${iconData.name}" 已添加到 "${iconData.groupId}" 分组，可以继续添加更多图标`,
+    });
   };
 
   return (
@@ -396,10 +466,12 @@ export const AddComponentDialog = ({ open, onOpenChange, onAddComponent }: AddCo
               </div>
             </TabsContent>
 
-            <TabsContent value="custom" className="flex-1 p-6">
-              <div className="flex items-center justify-center h-full text-gray-500">
-                自定义图标功能开发中...
-              </div>
+            <TabsContent value="custom" className="flex-1 mt-0 max-h-[50vh]  overflow-y-auto">
+              <CustomIconForm
+                currentGroupId={currentGroupId}
+                onSave={handleCustomIconSave}
+                onSaveAndContinue={handleCustomIconSaveAndContinue}
+              />
             </TabsContent>
           </Tabs>
         </div>

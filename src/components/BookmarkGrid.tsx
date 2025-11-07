@@ -463,6 +463,7 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         onAddComponent={handleAddComponent}
+        currentGroupId={category}
       />
     </div>
   );

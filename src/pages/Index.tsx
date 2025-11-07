@@ -131,11 +131,11 @@ const Index = () => {
         {/* Search Bar */}
         <SearchBar />
         
-        {/* Daily Quote */}
-        <DailyQuote />
-        
         {/* Bookmark Grid */}
         <BookmarkGrid category={currentCategory} />
+        
+        {/* Daily Quote */}
+        <DailyQuote />
       </div>
       
       {/* Drag Hint */}
