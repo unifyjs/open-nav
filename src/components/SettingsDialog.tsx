@@ -74,6 +74,11 @@ interface IconSettings {
   maxWidth: number;
 }
 
+interface LayoutSettings {
+  minimalistMode: boolean;
+  showDailyQuote: boolean;
+}
+
 interface UserInfo {
   id: string;
   username: string;
@@ -108,6 +113,7 @@ const OPEN_METHOD_STORAGE_KEY = "open_method_settings";
 const DATETIME_STORAGE_KEY = "datetime_settings";
 const SIDEBAR_STORAGE_KEY = "sidebar_settings";
 const ICON_STORAGE_KEY = "icon_settings";
+const LAYOUT_STORAGE_KEY = "layout_settings";
 const USER_INFO_STORAGE_KEY = "user_info";
 
 export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
@@ -151,6 +157,10 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     showName: true,
     nameSize: 12,
     maxWidth: 1388
+  });
+  const [layoutSettings, setLayoutSettings] = useState<LayoutSettings>({
+    minimalistMode: false,
+    showDailyQuote: true
   });
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
@@ -207,6 +217,17 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         setIconSettings(parsed);
       } catch (error) {
         console.error("Failed to parse icon settings:", error);
+      }
+    }
+    
+    // 加载布局设置
+    const savedLayoutSettings = localStorage.getItem(LAYOUT_STORAGE_KEY);
+    if (savedLayoutSettings) {
+      try {
+        const parsed = JSON.parse(savedLayoutSettings);
+        setLayoutSettings(parsed);
+      } catch (error) {
+        console.error("Failed to parse layout settings:", error);
       }
     }
   }, []);
@@ -267,6 +288,15 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     
     // 触发自定义事件，通知其他组件更新
     window.dispatchEvent(new CustomEvent('iconSettingsChanged', { detail: newSettings }));
+  };
+
+  // 保存布局设置到 localStorage
+  const saveLayoutSettings = (newSettings: LayoutSettings) => {
+    setLayoutSettings(newSettings);
+    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(newSettings));
+    
+    // 触发自定义事件，通知其他组件更新
+    window.dispatchEvent(new CustomEvent('layoutSettingsChanged', { detail: newSettings }));
   };
 
   // 切换新标签页打开设置
@@ -441,6 +471,17 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     saveIconSettings(newSettings);
   };
 
+  // 布局设置处理函数
+  const toggleMinimalistMode = (checked: boolean) => {
+    const newSettings = { ...layoutSettings, minimalistMode: checked };
+    saveLayoutSettings(newSettings);
+  };
+
+  const toggleShowDailyQuote = (checked: boolean) => {
+    const newSettings = { ...layoutSettings, showDailyQuote: checked };
+    saveLayoutSettings(newSettings);
+  };
+
   const resetIconLayout = () => {
     const defaultSettings: IconSettings = {
       iconSize: 60,
@@ -483,6 +524,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
       localStorage.removeItem(SIDEBAR_STORAGE_KEY);
       localStorage.removeItem(ICON_STORAGE_KEY);
       localStorage.removeItem(USER_INFO_STORAGE_KEY);
+      localStorage.removeItem(LAYOUT_STORAGE_KEY);
       
       // 重置所有状态到默认值
       setSettings({
@@ -520,6 +562,10 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         nameSize: 12,
         maxWidth: 1388
       });
+      setLayoutSettings({
+        minimalistMode: false,
+        showDailyQuote: true
+      });
       setUserInfo(null);
       
       // 触发事件通知其他组件更新
@@ -552,6 +598,10 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         nameSize: 12,
         maxWidth: 1388
       } }));
+      window.dispatchEvent(new CustomEvent('layoutSettingsChanged', { detail: {
+        minimalistMode: false,
+        showDailyQuote: true
+      } }));
       
       alert("所有本地数据已清除！");
     }
@@ -579,6 +629,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         dateTimeSettings: dateTimeSettings,
         sidebarSettings: sidebarSettings,
         iconSettings: iconSettings,
+        layoutSettings: layoutSettings,
         userInfo: userInfo,
         exportTime: new Date().toISOString(),
         version: "1.0"
@@ -648,6 +699,11 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
             localStorage.setItem(ICON_STORAGE_KEY, JSON.stringify(importData.iconSettings));
           }
           
+          if (importData.layoutSettings) {
+            setLayoutSettings(importData.layoutSettings);
+            localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(importData.layoutSettings));
+          }
+          
           if (importData.userInfo) {
             setUserInfo(importData.userInfo);
             localStorage.setItem(USER_INFO_STORAGE_KEY, JSON.stringify(importData.userInfo));
@@ -659,6 +715,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
           window.dispatchEvent(new CustomEvent('dateTimeSettingsChanged', { detail: importData.dateTimeSettings }));
           window.dispatchEvent(new CustomEvent('sidebarSettingsChanged', { detail: importData.sidebarSettings }));
           window.dispatchEvent(new CustomEvent('iconSettingsChanged', { detail: importData.iconSettings }));
+          window.dispatchEvent(new CustomEvent('layoutSettingsChanged', { detail: importData.layoutSettings }));
           
           alert("数据导入成功！");
         } catch (error) {
@@ -724,11 +781,19 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
       localStorage.setItem(DATETIME_STORAGE_KEY, JSON.stringify(defaultDateTimeSettings));
       localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(defaultSidebarSettings));
       
+      const defaultLayoutSettings = {
+        minimalistMode: false,
+        showDailyQuote: true
+      };
+      setLayoutSettings(defaultLayoutSettings);
+      localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(defaultLayoutSettings));
+      
       // 触发事件通知其他组件更新
       window.dispatchEvent(new Event('wallpaperSettingsChanged'));
       window.dispatchEvent(new CustomEvent('openMethodSettingsChanged', { detail: defaultOpenMethodSettings }));
       window.dispatchEvent(new CustomEvent('dateTimeSettingsChanged', { detail: defaultDateTimeSettings }));
       window.dispatchEvent(new CustomEvent('sidebarSettingsChanged', { detail: defaultSidebarSettings }));
+      window.dispatchEvent(new CustomEvent('layoutSettingsChanged', { detail: defaultLayoutSettings }));
       
       alert("其他设置已重置！");
     }
@@ -885,6 +950,57 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
               <span className="text-sm text-blue-400">
                 当前设置：{openMethodSettings.openInNewTab ? '新标签页打开' : '当前页面打开'}
               </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderLayoutSettings = () => (
+    <div className="p-6 space-y-6">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <h3 className="text-lg font-medium text-white">布局设置</h3>
+          <p className="text-sm text-white/60">配置页面的显示模式和组件显示选项</p>
+        </div>
+        
+        <div className="space-y-4">
+          {/* 极简模式设置 */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-white">极简模式</Label>
+              <p className="text-xs text-white/60">开启后只显示时间和搜索框，隐藏其他所有组件</p>
+            </div>
+            <Switch
+              checked={layoutSettings.minimalistMode}
+              onCheckedChange={toggleMinimalistMode}
+            />
+          </div>
+          
+          {/* 底部显示一言设置 */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-white">底部显示一言</Label>
+              <p className="text-xs text-white/60">控制页面底部一言组件的显示和隐藏</p>
+            </div>
+            <Switch
+              checked={layoutSettings.showDailyQuote}
+              onCheckedChange={toggleShowDailyQuote}
+            />
+          </div>
+          
+          {/* 当前设置状态显示 */}
+          <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Layout className="w-4 h-4 text-blue-400" />
+                <span className="text-sm text-blue-400 font-medium">当前布局状态</span>
+              </div>
+              <div className="text-xs text-blue-300 space-y-1">
+                <p>极简模式：{layoutSettings.minimalistMode ? '已开启' : '已关闭'}</p>
+                <p>底部一言：{layoutSettings.showDailyQuote ? '已显示' : '已隐藏'}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -1641,6 +1757,8 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         return renderWallpaperSettings();
       case "openMethod":
         return renderOpenMethodSettings();
+      case "layout":
+        return renderLayoutSettings();
       case "datetime":
         return renderDateTimeSettings();
       case "sidebar":

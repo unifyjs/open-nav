@@ -29,8 +29,14 @@ interface SidebarSettings {
   opacity: number;
 }
 
+interface LayoutSettings {
+  minimalistMode: boolean;
+  showDailyQuote: boolean;
+}
+
 const DATETIME_STORAGE_KEY = "datetime_settings";
 const SIDEBAR_STORAGE_KEY = "sidebar_settings";
+const LAYOUT_STORAGE_KEY = "layout_settings";
 
 const defaultSettings: DateTimeSettings = {
   showTime: true,
@@ -55,6 +61,10 @@ const Index = () => {
     width: 60,
     opacity: 40
   });
+  const [layoutSettings, setLayoutSettings] = useState<LayoutSettings>({
+    minimalistMode: false,
+    showDailyQuote: true
+  });
 
   // 加载设置
   useEffect(() => {
@@ -75,9 +85,9 @@ const Index = () => {
 
     window.addEventListener('dateTimeSettingsChanged', handleSettingsChange as EventListener);
     
-    return () => {
-      window.removeEventListener('dateTimeSettingsChanged', handleSettingsChange as EventListener);
-    };
+    // return () => {
+    //   window.removeEventListener('dateTimeSettingsChanged', handleSettingsChange as EventListener);
+    // };
 
     // 加载侧边栏设置
     const savedSidebarSettings = localStorage.getItem(SIDEBAR_STORAGE_KEY);
@@ -97,9 +107,29 @@ const Index = () => {
 
     window.addEventListener('sidebarSettingsChanged', handleSidebarSettingsChange as EventListener);
     
+    // 加载布局设置
+    const savedLayoutSettings = localStorage.getItem(LAYOUT_STORAGE_KEY);
+    if (savedLayoutSettings) {
+      try {
+        const parsed = JSON.parse(savedLayoutSettings);
+        setLayoutSettings(parsed);
+      } catch (error) {
+        console.error('Failed to parse layout settings:', error);
+      }
+    }
+
+    // 监听布局设置变化
+    const handleLayoutSettingsChange = (event: CustomEvent) => {
+      setLayoutSettings(event.detail);
+    };
+
+    window.addEventListener('layoutSettingsChanged', handleLayoutSettingsChange as EventListener);
+    
     return () => {
       window.removeEventListener('dateTimeSettingsChanged', handleSettingsChange as EventListener);
       window.removeEventListener('sidebarSettingsChanged', handleSidebarSettingsChange as EventListener);
+      window.removeEventListener('layoutSettingsChanged', handleLayoutSettingsChange as EventListener);
+      window.removeEventListener('dateTimeSettingsChanged', handleSettingsChange as EventListener);
     };
   }, []);
 
@@ -109,20 +139,22 @@ const Index = () => {
       <VideoBackground />
       
       {/* Top Bar */}
-      <TopBar />
+      {!layoutSettings.minimalistMode && <TopBar />}
       
       {/* Sidebar */}
-      <Sidebar 
-        currentCategory={currentCategory}
-        onCategoryChange={setCurrentCategory}
-      />
+      {!layoutSettings.minimalistMode && (
+        <Sidebar 
+          currentCategory={currentCategory}
+          onCategoryChange={setCurrentCategory}
+        />
+      )}
       
       {/* Main Content */}
       <div 
         className="min-h-screen h-screen flex flex-col transition-all duration-300"
         style={{
-          marginLeft: sidebarSettings.position === 'left' ? `${sidebarSettings.width}px` : '0',
-          marginRight: sidebarSettings.position === 'right' ? `${sidebarSettings.width}px` : '0'
+          marginLeft: !layoutSettings.minimalistMode && sidebarSettings.position === 'left' ? `${sidebarSettings.width}px` : '0',
+          marginRight: !layoutSettings.minimalistMode && sidebarSettings.position === 'right' ? `${sidebarSettings.width}px` : '0'
         }}
       >
         {/* Time Display */}
@@ -132,14 +164,14 @@ const Index = () => {
         <SearchBar />
         
         {/* Bookmark Grid */}
-        <BookmarkGrid category={currentCategory} />
+        {!layoutSettings.minimalistMode && <BookmarkGrid category={currentCategory} />}
         
         {/* Daily Quote */}
-        <DailyQuote />
+        {layoutSettings.showDailyQuote && <DailyQuote />}
       </div>
       
       {/* Drag Hint */}
-      <DragHint />
+      {!layoutSettings.minimalistMode && <DragHint />}
     </div>
   );
 };
