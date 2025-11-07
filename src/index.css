@@ -130,4 +130,47 @@ All colors MUST be HSL.
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  
+  /* 响应式网格布局优化 */
+  .grid-responsive {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 1rem;
+  }
+  
+  @media (max-width: 640px) {
+    .grid-responsive {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+    }
+  }
+  
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .grid-responsive {
+      grid-template-columns: repeat(8, 1fr);
+      gap: 0.75rem;
+    }
+  }
+  
+  @media (min-width: 1025px) {
+    .grid-responsive {
+      grid-template-columns: repeat(12, 1fr);
+      gap: 1rem;
+    }
+  }
+  
+  /* 图标项目响应式优化 */
+  .bookmark-item {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .bookmark-item:hover {
+    transform: scale(1.05);
+  }
+  
+  @media (max-width: 640px) {
+    .bookmark-item:hover {
+      transform: scale(1.02); /* 手机端减少缩放效果 */
+    }
+  }
 }

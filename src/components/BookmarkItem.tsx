@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { GripVertical } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useMediaQuery } from "@/hooks/use-mobile";
 
 interface BookmarkItemProps {
   title: string;
@@ -33,6 +34,20 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging
     nameSize: 12,
     maxWidth: 1388
   });
+  
+  // 响应式断点检测
+  const isMobile = useMediaQuery("(max-width: 640px)");
+  const isTablet = useMediaQuery("(max-width: 1024px)");
+  
+  // 响应式图标尺寸计算
+  const getResponsiveIconSize = () => {
+    const baseSize = iconSettings.iconSize;
+    if (isMobile) return Math.max(baseSize * 0.7, 40); // 手机端缩小30%，最小40px
+    if (isTablet) return Math.max(baseSize * 0.85, 50); // 平板端缩小15%，最小50px
+    return baseSize; // 桌面端保持原大小
+  };
+  
+  const responsiveIconSize = getResponsiveIconSize();
 
   // 加载图标设置
   useEffect(() => {
@@ -116,9 +131,9 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging
           className="flex items-center justify-center mb-0 overflow-hidden"
           style={{ 
             backgroundColor: color,
-            width: `${iconSettings.iconSize}px`,
-            height: `${iconSettings.iconSize}px`,
-            borderRadius: `${iconSettings.iconBorderRadius}px`
+            width: `${responsiveIconSize}px`,
+            height: `${responsiveIconSize}px`,
+            borderRadius: `${iconSettings.iconBorderRadius * (responsiveIconSize / iconSettings.iconSize)}px`
           }}
         >
           <img 
@@ -126,8 +141,8 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging
             alt={title}
             className="object-contain"
             style={{
-              width: `${iconSettings.iconSize * 0.6}px`,
-              height: `${iconSettings.iconSize * 0.6}px`
+              width: `${responsiveIconSize * 0.6}px`,
+              height: `${responsiveIconSize * 0.6}px`
             }}
             onError={(e) => {
               // Fallback to a simple colored square with first letter
@@ -135,15 +150,15 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging
               target.style.display = 'none';
               const parent = target.parentElement;
               if (parent) {
-                parent.innerHTML = `<span class="text-white font-bold" style="font-size: ${iconSettings.iconSize * 0.3}px">${title.charAt(0)}</span>`;
+                parent.innerHTML = `<span class="text-white font-bold" style="font-size: ${responsiveIconSize * 0.3}px">${title.charAt(0)}</span>`;
               }
             }}
           />
         </div>
         {iconSettings.showName && (
           <span 
-            className="text-white text-center leading-tight px-1 line-clamp-2"
-            style={{ fontSize: `${iconSettings.nameSize}px` }}
+            className="text-white text-center leading-tight px-1 line-clamp-2 text-xs sm:text-sm"
+            style={{ fontSize: `${Math.max(iconSettings.nameSize * (responsiveIconSize / iconSettings.iconSize), 10)}px` }}
           >
             {title}
           </span>

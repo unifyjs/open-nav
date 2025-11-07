@@ -17,3 +17,25 @@ export function useIsMobile() {
 
   return !!isMobile
 }
+
+// 通用的 media query hook
+export function useMediaQuery(query: string) {
+  const [matches, setMatches] = React.useState<boolean>(false)
+
+  React.useEffect(() => {
+    const mql = window.matchMedia(query)
+    const onChange = () => {
+      setMatches(mql.matches)
+    }
+    
+    // 初始化状态
+    setMatches(mql.matches)
+    
+    // 监听变化
+    mql.addEventListener("change", onChange)
+    
+    return () => mql.removeEventListener("change", onChange)
+  }, [query])
+
+  return matches
+}

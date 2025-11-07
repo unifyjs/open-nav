@@ -7,6 +7,8 @@ import { VideoBackground } from "@/components/VideoBackground";
 import { TopBar } from "@/components/TopBar";
 import { DailyQuote } from "@/components/DailyQuote";
 import { DragHint } from "@/components/DragHint";
+import { useMediaQuery } from "@/hooks/use-mobile";
+import { MobileCategorySelector } from "@/components/MobileCategorySelector";
 
 interface DateTimeSettings {
   showTime: boolean;
@@ -54,6 +56,9 @@ const defaultSettings: DateTimeSettings = {
 const Index = () => {
   const [currentCategory, setCurrentCategory] = useState("主页");
   const [settings, setSettings] = useState<DateTimeSettings>(defaultSettings);
+  
+  // 响应式断点检测
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const [sidebarSettings, setSidebarSettings] = useState<SidebarSettings>({
     position: 'left',
     autoHide: false,
@@ -142,7 +147,7 @@ const Index = () => {
       {!layoutSettings.minimalistMode && <TopBar />}
       
       {/* Sidebar */}
-      {!layoutSettings.minimalistMode && (
+      {!layoutSettings.minimalistMode && !isMobile && (
         <Sidebar 
           currentCategory={currentCategory}
           onCategoryChange={setCurrentCategory}
@@ -153,8 +158,8 @@ const Index = () => {
       <div 
         className="min-h-screen h-screen flex flex-col transition-all duration-300"
         style={{
-          marginLeft: !layoutSettings.minimalistMode && sidebarSettings.position === 'left' ? `${sidebarSettings.width}px` : '0',
-          marginRight: !layoutSettings.minimalistMode && sidebarSettings.position === 'right' ? `${sidebarSettings.width}px` : '0'
+          marginLeft: !layoutSettings.minimalistMode && !isMobile && sidebarSettings.position === 'left' ? `${sidebarSettings.width}px` : '0',
+          marginRight: !layoutSettings.minimalistMode && !isMobile && sidebarSettings.position === 'right' ? `${sidebarSettings.width}px` : '0'
         }}
       >
         {/* Time Display */}
@@ -162,6 +167,14 @@ const Index = () => {
         
         {/* Search Bar */}
         <SearchBar />
+        
+        {/* Mobile Category Selector */}
+        {isMobile && !layoutSettings.minimalistMode && (
+          <MobileCategorySelector 
+            currentCategory={currentCategory}
+            onCategoryChange={setCurrentCategory}
+          />
+        )}
         
         {/* Bookmark Grid */}
         {!layoutSettings.minimalistMode && <BookmarkGrid category={currentCategory} />}

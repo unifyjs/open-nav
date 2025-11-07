@@ -3,6 +3,7 @@ import { BookmarkItem } from "./BookmarkItem";
 import { WidgetItem } from "./WidgetItem";
 import { SizeSelector } from "./SizeSelector";
 import { AddComponentDialog } from "./AddComponentDialog";
+import { useMediaQuery } from "@/hooks/use-mobile";
 
 interface BookmarkGridProps {
   category: string;
@@ -148,6 +149,20 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
   }>({ show: false, x: 0, y: 0, item: null });
 
   const gridRef = useRef<HTMLDivElement>(null);
+  
+  // 响应式断点检测
+  const isMobile = useMediaQuery("(max-width: 640px)");
+  const isTablet = useMediaQuery("(max-width: 1024px)");
+  const isDesktop = useMediaQuery("(min-width: 1025px)");
+  
+  // 根据屏幕尺寸动态计算网格列数
+  const getGridColumns = () => {
+    if (isMobile) return 4; // 手机端4列
+    if (isTablet) return 8; // 平板端8列
+    return 12; // 桌面端12列
+  };
+  
+  const gridColumns = getGridColumns();
 
   // Load items from localStorage or use default data
   useEffect(() => {
@@ -381,23 +396,39 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
     }
   }, [contextMenu.show]);
 
+  // 响应式网格占位计算
   const getGridSpan = (size: string) => {
+    const maxCols = gridColumns;
+    
     switch (size) {
       case "1x1": return "col-span-1 row-span-1";
       case "1x2": return "col-span-1 row-span-2";
-      case "2x1": return "col-span-2 row-span-1";
-      case "2x2": return "col-span-2 row-span-2";
-      case "2x4": return "col-span-2 row-span-4";
+      case "2x1": 
+        return isMobile ? "col-span-2 row-span-1" : "col-span-2 row-span-1";
+      case "2x2": 
+        return isMobile ? "col-span-2 row-span-2" : "col-span-2 row-span-2";
+      case "2x4": 
+        return isMobile ? "col-span-2 row-span-4" : "col-span-2 row-span-4";
+      case "4x1": 
+        return isMobile ? "col-span-4 row-span-1" : isTablet ? "col-span-4 row-span-1" : "col-span-4 row-span-1";
+      case "4x2": 
+        return isMobile ? "col-span-4 row-span-2" : isTablet ? "col-span-4 row-span-2" : "col-span-4 row-span-2";
+      case "4x4": 
+        return isMobile ? "col-span-4 row-span-2" : isTablet ? "col-span-4 row-span-2" : "col-span-4 row-span-2";
       default: return "col-span-1 row-span-1";
     }
   };
 
   return (
-    <div className="flex-1 px-8 pb-8 max-h-[90vh] overflow-y-auto hide-scrollbar" style={{ maxWidth: `${iconSettings.maxWidth}px`, margin: '0 auto' }}>
+    <div className="flex-1 px-2 sm:px-4 md:px-6 lg:px-8 pb-8 max-h-[90vh] overflow-y-auto hide-scrollbar" style={{ maxWidth: `${iconSettings.maxWidth}px`, margin: '0 auto' }}>
       <div 
         ref={gridRef} 
-        className="grid grid-cols-12 auto-rows-[80px] relative"
-        style={{ gap: `${iconSettings.iconSpacing}px` }}
+        className={`grid auto-rows-[80px] relative ${
+          isMobile ? 'grid-cols-4' : 
+          isTablet ? 'grid-cols-8' : 
+          'grid-cols-12'
+        }`}
+        style={{ gap: `${Math.max(iconSettings.iconSpacing * (isMobile ? 0.5 : isTablet ? 0.75 : 1), 8)}px` }}
       >
         {items.map((item, index) => {
           const isDraggedOver = draggedOverIndex === index;
