@@ -139,7 +139,7 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
     iconSpacing: 27,
     showName: true,
     nameSize: 12,
-    maxWidth: 1388
+    maxWidth: window.innerWidth || 1388
   });
   const [contextMenu, setContextMenu] = useState<{
     show: boolean;
@@ -426,7 +426,7 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
         className={`grid auto-rows-[80px] relative ${
           isMobile ? 'grid-cols-4' : 
           isTablet ? 'grid-cols-8' : 
-          'grid-cols-12'
+          `grid-cols-12`
         }`}
         style={{ gap: `${Math.max(iconSettings.iconSpacing * (isMobile ? 0.5 : isTablet ? 0.75 : 1), 8)}px` }}
       >

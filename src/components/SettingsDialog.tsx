@@ -156,7 +156,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     iconSpacing: 27,
     showName: true,
     nameSize: 12,
-    maxWidth: 1388
+    maxWidth: window.innerWidth || 1388
   });
   const [layoutSettings, setLayoutSettings] = useState<LayoutSettings>({
     minimalistMode: false,
@@ -489,7 +489,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
       iconSpacing: 27,
       showName: true,
       nameSize: 12,
-      maxWidth: 1388
+      maxWidth: window.innerWidth || 1388
     };
     saveIconSettings(defaultSettings);
   };
@@ -560,7 +560,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         iconSpacing: 27,
         showName: true,
         nameSize: 12,
-        maxWidth: 1388
+        maxWidth: window.innerWidth || 1388
       });
       setLayoutSettings({
         minimalistMode: false,
@@ -596,7 +596,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         iconSpacing: 27,
         showName: true,
         nameSize: 12,
-        maxWidth: 1388
+        maxWidth: window.innerWidth || 1388
       } }));
       window.dispatchEvent(new CustomEvent('layoutSettingsChanged', { detail: {
         minimalistMode: false,
@@ -1371,7 +1371,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
             <Slider
               value={[iconSettings.maxWidth]}
               onValueChange={updateMaxWidth}
-              max={2000}
+              max={2600}
               min={800}
               step={10}
               className="w-full"

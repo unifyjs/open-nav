@@ -32,7 +32,7 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging
     iconSpacing: 27,
     showName: true,
     nameSize: 12,
-    maxWidth: 1388
+    maxWidth: window.innerWidth || 1388
   });
   
   // 响应式断点检测
