@@ -7,6 +7,8 @@ import { useMediaQuery } from "@/hooks/use-mobile";
 
 interface BookmarkGridProps {
   category: string;
+  onCategoryChange?: (category: string) => void;
+  categories?: Array<{ id: string; label: string; icon: string; isCustom?: boolean; isEdited?: boolean }>;
 }
 
 interface GridItem {
@@ -127,7 +129,7 @@ const defaultBookmarkData: Record<string, GridItem[]> = {
   ],
 };
 
-export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
+export const BookmarkGrid = ({ category, onCategoryChange, categories = [] }: BookmarkGridProps) => {
   const [items, setItems] = useState<GridItem[]>([]);
   const [draggedItem, setDraggedItem] = useState<GridItem | null>(null);
   const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
@@ -148,8 +150,11 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
     item: GridItem | null;
   }>({ show: false, x: 0, y: 0, item: null });
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [sidebarSettings, setSidebarSettings] = useState<{ scrollSwitch: boolean }>({ scrollSwitch: true });
+  const [isScrolling, setIsScrolling] = useState(false);
 
   const gridRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   
   // 响应式断点检测
   const isMobile = useMediaQuery("(max-width: 640px)");
@@ -267,10 +272,12 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
     
     window.addEventListener('openMethodSettingsChanged', handleOpenMethodSettingsChange as EventListener);
     window.addEventListener('iconSettingsChanged', handleIconSettingsChange as EventListener);
+    // window.addEventListener('sidebarSettingsChanged', handleSidebarSettingsChange as EventListener);
     
     return () => {
       window.removeEventListener('openMethodSettingsChanged', handleOpenMethodSettingsChange as EventListener);
       window.removeEventListener('iconSettingsChanged', handleIconSettingsChange as EventListener);
+      // window.removeEventListener('sidebarSettingsChanged', handleSidebarSettingsChange as EventListener);
     };
 }, [category]);
 
@@ -431,6 +438,101 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
     }
   }, [contextMenu.show]);
 
+  // 滚动边界检测和分组切换
+  useEffect(() => {
+    if (!sidebarSettings.scrollSwitch || !onCategoryChange || categories.length === 0) return;
+
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    let scrollTimeout: NodeJS.Timeout;
+    
+    const handleScroll = () => {
+      if (isScrolling) return;
+      
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      const isAtTop = scrollTop === 0;
+      const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 1;
+      
+      // 只在滚动到边界时处理
+      if (!isAtTop && !isAtBottom) return;
+      
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        const currentIndex = categories.findIndex(cat => cat.id === category);
+        if (currentIndex === -1) return;
+        
+        let targetIndex = -1;
+        
+        if (isAtTop && currentIndex > 0) {
+          // 在顶部，切换到上一个分组
+          targetIndex = currentIndex - 1;
+        } else if (isAtBottom && currentIndex < categories.length - 1) {
+          // 在底部，切换到下一个分组
+          targetIndex = currentIndex + 1;
+        }
+        
+        if (targetIndex >= 0 && targetIndex < categories.length) {
+          setIsScrolling(true);
+          onCategoryChange(categories[targetIndex].id);
+          
+          // 防止频繁切换
+          setTimeout(() => {
+            setIsScrolling(false);
+          }, 500);
+        }
+      }, 100); // 100ms 防抖
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      if (isScrolling) return;
+      
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      const isAtTop = scrollTop === 0;
+      const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 1;
+      
+      // 只在滚动到边界时处理滚轮事件
+      if ((isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
+        e.preventDefault();
+        
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          const currentIndex = categories.findIndex(cat => cat.id === category);
+          if (currentIndex === -1) return;
+          
+          let targetIndex = -1;
+          
+          if (isAtTop && e.deltaY < 0 && currentIndex > 0) {
+            // 在顶部向上滚动，切换到上一个分组
+            targetIndex = currentIndex - 1;
+          } else if (isAtBottom && e.deltaY > 0 && currentIndex < categories.length - 1) {
+            // 在底部向下滚动，切换到下一个分组
+            targetIndex = currentIndex + 1;
+          }
+          
+          if (targetIndex >= 0 && targetIndex < categories.length) {
+            setIsScrolling(true);
+            onCategoryChange(categories[targetIndex].id);
+            
+            // 防止频繁切换
+            setTimeout(() => {
+              setIsScrolling(false);
+            }, 500);
+          }
+        }, 100);
+      }
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    scrollContainer.addEventListener('wheel', handleWheel, { passive: false });
+    
+    return () => {
+      scrollContainer.removeEventListener('scroll', handleScroll);
+      scrollContainer.removeEventListener('wheel', handleWheel);
+      clearTimeout(scrollTimeout);
+    };
+  }, [sidebarSettings.scrollSwitch, onCategoryChange, categories, category, isScrolling]);
+
 // 响应式网格占位计算
   const getGridSpan = (size: string) => {
     const maxCols = gridColumns;
@@ -457,7 +559,11 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
   };
 
 return (
-    <div className="flex-1 px-2 sm:px-4 md:px-6 lg:px-8 pb-8 max-h-[90vh] overflow-y-auto hide-scrollbar" style={{ maxWidth: `${iconSettings.maxWidth}px`, margin: '0 auto' }}>
+    <div 
+      ref={scrollContainerRef}
+      className="flex-1 px-2 sm:px-4 md:px-6 lg:px-8 pb-8 max-h-[90vh] overflow-y-auto hide-scrollbar" 
+      style={{ maxWidth: `${iconSettings.maxWidth}px`, margin: '0 auto' }}
+    >
       <div 
         ref={gridRef} 
         className={`grid auto-rows-[80px] relative`}

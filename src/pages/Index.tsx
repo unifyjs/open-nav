@@ -40,6 +40,15 @@ const DATETIME_STORAGE_KEY = "datetime_settings";
 const SIDEBAR_STORAGE_KEY = "sidebar_settings";
 const LAYOUT_STORAGE_KEY = "layout_settings";
 
+const defaultCategories: Category[] = [
+  { id: "主页", label: "主页", icon: "Home" },
+  { id: "AI", label: "AI", icon: "Bot" },
+  { id: "摸鱼", label: "摸鱼", icon: "Coffee" },
+  { id: "开发", label: "开发", icon: "Code" },
+  { id: "设计", label: "设计", icon: "Palette" },
+  { id: "新媒体", label: "新媒体", icon: "Megaphone" },
+];
+
 const defaultSettings: DateTimeSettings = {
   showTime: true,
   showSearchBar: true,
@@ -56,6 +65,7 @@ const defaultSettings: DateTimeSettings = {
 const Index = () => {
   const [currentCategory, setCurrentCategory] = useState("主页");
   const [settings, setSettings] = useState<DateTimeSettings>(defaultSettings);
+  const [categories, setCategories] = useState<Category[]>(defaultCategories);
   
   // 响应式断点检测
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -70,6 +80,35 @@ const Index = () => {
     minimalistMode: false,
     showDailyQuote: true
   });
+
+  // 加载分组数据
+  useEffect(() => {
+    let processedCategories = [...defaultCategories];
+    
+    // 处理隐藏的默认分组
+    const hiddenDefaults = JSON.parse(localStorage.getItem('hidden_default_categories') || '[]');
+    processedCategories = processedCategories.filter(cat => !hiddenDefaults.includes(cat.id));
+    
+    // 处理编辑过的默认分组
+    const editedDefaults = JSON.parse(localStorage.getItem('edited_default_categories') || '[]');
+    processedCategories = processedCategories.map(cat => {
+      const edited = editedDefaults.find((editedCat: any) => editedCat.id === cat.id);
+      return edited ? { ...cat, label: edited.label, icon: edited.icon, isEdited: true } : cat;
+    });
+    
+    // 加载自定义分组
+    const savedCategories = localStorage.getItem('custom_categories');
+    if (savedCategories) {
+      try {
+        const parsed = JSON.parse(savedCategories);
+        processedCategories = [...processedCategories, ...parsed];
+      } catch (error) {
+        console.error('Failed to parse custom categories:', error);
+      }
+    }
+    
+    setCategories(processedCategories);
+  }, []);
 
   // 加载设置
   useEffect(() => {
@@ -177,7 +216,13 @@ const Index = () => {
         )}
         
         {/* Bookmark Grid */}
-        {!layoutSettings.minimalistMode && <BookmarkGrid category={currentCategory} />}
+        {!layoutSettings.minimalistMode && (
+          <BookmarkGrid 
+            category={currentCategory} 
+            onCategoryChange={setCurrentCategory}
+            categories={categories}
+          />
+        )}
         
         {/* Daily Quote */}
         {layoutSettings.showDailyQuote && <DailyQuote />}
