@@ -19,6 +19,7 @@ interface AddComponentDialogProps {
   onOpenChange: (open: boolean) => void;
   onAddComponent: (component: ComponentItem) => void;
   currentGroupId?: string;
+  existingItems?: ComponentItem[]; // 新增：当前分组中已存在的项目
 }
 
 interface ComponentItem {
@@ -180,7 +181,7 @@ interface WebsiteData {
   }[];
 }
 
-export const AddComponentDialog = ({ open, onOpenChange, onAddComponent, currentGroupId = "主页" }: AddComponentDialogProps) => {
+export const AddComponentDialog = ({ open, onOpenChange, onAddComponent, currentGroupId = "主页", existingItems = [] }: AddComponentDialogProps) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [activeTab, setActiveTab] = useState("components");
   const [searchQuery, setSearchQuery] = useState("");
@@ -217,7 +218,23 @@ export const AddComponentDialog = ({ open, onOpenChange, onAddComponent, current
     return matchesCategory && matchesSearch;
   }) : [];
 
+  // 检查是否重复的函数
+  const isComponentDuplicate = (component: ComponentItem) => {
+    return existingItems.some(item => 
+      item.id === component.id || 
+      (item.title === component.title && item.url === component.url)
+    );
+  };
+
   const handleAddComponent = (component: ComponentItem) => {
+    if (isComponentDuplicate(component)) {
+      toast({
+        title: "无法添加",
+        description: `图标 "${component.title}" 已存在于当前分组中，无法重复添加！`,
+        variant: "destructive",
+      });
+      return;
+    }
     onAddComponent(component);
   };
 
@@ -232,6 +249,16 @@ export const AddComponentDialog = ({ open, onOpenChange, onAddComponent, current
       category: website.category,
       type: "bookmark"
     };
+    
+    if (isComponentDuplicate(componentItem)) {
+      toast({
+        title: "无法添加",
+        description: `网站 "${website.title}" 已存在于当前分组中，无法重复添加！`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
     onAddComponent(componentItem);
   };
 
@@ -267,6 +294,15 @@ export const AddComponentDialog = ({ open, onOpenChange, onAddComponent, current
       type: "bookmark"
     };
     
+    if (isComponentDuplicate(componentItem)) {
+      toast({
+        title: "无法添加",
+        description: `自定义图标 "${iconData.name}" 已存在于当前分组中，无法重复添加！`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
     onAddComponent(componentItem);
     onOpenChange(false);
     
@@ -292,6 +328,15 @@ export const AddComponentDialog = ({ open, onOpenChange, onAddComponent, current
       category: iconData.groupId,
       type: "bookmark"
     };
+    
+    if (isComponentDuplicate(componentItem)) {
+      toast({
+        title: "无法添加",
+        description: `自定义图标 "${iconData.name}" 已存在于当前分组中，无法重复添加！`,
+        variant: "destructive",
+      });
+      return;
+    }
     
     onAddComponent(componentItem);
     
