@@ -147,6 +147,7 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
     y: number;
     item: GridItem | null;
   }>({ show: false, x: 0, y: 0, item: null });
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   const gridRef = useRef<HTMLDivElement>(null);
   
@@ -155,14 +156,42 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
   const isTablet = useMediaQuery("(max-width: 1024px)");
   const isDesktop = useMediaQuery("(min-width: 1025px)");
   
+  // 动态计算桌面端网格列数
+  const calculateDesktopColumns = () => {
+    if (!isDesktop) return 12; // 非桌面端返回默认值
+    
+    // 获取容器的实际可用宽度
+    const containerPadding = 64; // 左右padding总和 (px-8 = 32px * 2)
+    const maxContainerWidth = Math.min(windowWidth - containerPadding, iconSettings.maxWidth);
+    
+    // 计算单个图标占用的宽度（图标大小 + 间距）
+    const iconTotalWidth = iconSettings.iconSize + iconSettings.iconSpacing;
+    
+    // 计算能容纳的列数
+    const calculatedColumns = Math.floor(maxContainerWidth / iconTotalWidth);
+    
+    // 设置合理的列数范围：最少8列，最多24列
+    return Math.max(8, Math.min(24, calculatedColumns));
+  };
+  
   // 根据屏幕尺寸动态计算网格列数
   const getGridColumns = () => {
     if (isMobile) return 4; // 手机端4列
     if (isTablet) return 8; // 平板端8列
-    return 12; // 桌面端12列
+    return calculateDesktopColumns(); // 桌面端动态计算
   };
   
   const gridColumns = getGridColumns();
+  
+  // 监听窗口大小变化
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Load items from localStorage or use default data
   useEffect(() => {
@@ -243,7 +272,13 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
       window.removeEventListener('openMethodSettingsChanged', handleOpenMethodSettingsChange as EventListener);
       window.removeEventListener('iconSettingsChanged', handleIconSettingsChange as EventListener);
     };
-  }, [category]);
+}, [category]);
+
+  // 监听图标设置和窗口大小变化，重新计算网格列数
+  useEffect(() => {
+    // 当图标设置或窗口大小变化时，触发重新渲染
+    // 这里不需要额外的逼辑，只需要依赖项变化即可触发组件重新渲染
+  }, [iconSettings.iconSize, iconSettings.iconSpacing, iconSettings.maxWidth, windowWidth, isMobile, isTablet, isDesktop]);
 
   // Save items to localStorage whenever items change
   useEffect(() => {
@@ -396,39 +431,40 @@ export const BookmarkGrid = ({ category }: BookmarkGridProps) => {
     }
   }, [contextMenu.show]);
 
-  // 响应式网格占位计算
+// 响应式网格占位计算
   const getGridSpan = (size: string) => {
     const maxCols = gridColumns;
     
-    switch (size) {
-      case "1x1": return "col-span-1 row-span-1";
-      case "1x2": return "col-span-1 row-span-2";
-      case "2x1": 
-        return isMobile ? "col-span-2 row-span-1" : "col-span-2 row-span-1";
-      case "2x2": 
-        return isMobile ? "col-span-2 row-span-2" : "col-span-2 row-span-2";
-      case "2x4": 
-        return isMobile ? "col-span-2 row-span-4" : "col-span-2 row-span-4";
-      case "4x1": 
-        return isMobile ? "col-span-4 row-span-1" : isTablet ? "col-span-4 row-span-1" : "col-span-4 row-span-1";
-      case "4x2": 
-        return isMobile ? "col-span-4 row-span-2" : isTablet ? "col-span-4 row-span-2" : "col-span-4 row-span-2";
-      case "4x4": 
-        return isMobile ? "col-span-4 row-span-2" : isTablet ? "col-span-4 row-span-2" : "col-span-4 row-span-2";
-      default: return "col-span-1 row-span-1";
+    // 解析尺寸字符串，获取列数和行数
+    const [colSpan, rowSpan] = size.split('x').map(Number);
+    
+    // 根据屏幕类型调整列数
+    let adjustedColSpan = colSpan;
+    
+    if (isMobile) {
+      // 手机端：最大4列，超过的被限制为4列
+      adjustedColSpan = Math.min(colSpan, 4);
+    } else if (isTablet) {
+      // 平板端：最大8列，超过的被限制为8列
+      adjustedColSpan = Math.min(colSpan, 8);
+    } else {
+      // 桌面端：根据动态计算的列数限制
+      adjustedColSpan = Math.min(colSpan, maxCols);
     }
+    
+    // 返回动态生成的CSS类
+    return `col-span-${adjustedColSpan} row-span-${rowSpan}`;
   };
 
-  return (
+return (
     <div className="flex-1 px-2 sm:px-4 md:px-6 lg:px-8 pb-8 max-h-[90vh] overflow-y-auto hide-scrollbar" style={{ maxWidth: `${iconSettings.maxWidth}px`, margin: '0 auto' }}>
       <div 
         ref={gridRef} 
-        className={`grid auto-rows-[80px] relative ${
-          isMobile ? 'grid-cols-4' : 
-          isTablet ? 'grid-cols-8' : 
-          `grid-cols-12`
-        }`}
-        style={{ gap: `${Math.max(iconSettings.iconSpacing * (isMobile ? 0.5 : isTablet ? 0.75 : 1), 8)}px` }}
+        className={`grid auto-rows-[80px] relative`}
+        style={{ 
+          gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))`,
+          gap: `${Math.max(iconSettings.iconSpacing * (isMobile ? 0.5 : isTablet ? 0.75 : 1), 8)}px` 
+        }}
       >
         {items.map((item, index) => {
           const isDraggedOver = draggedOverIndex === index;
