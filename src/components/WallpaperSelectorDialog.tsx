@@ -572,7 +572,6 @@ export const WallpaperSelectorDialog = ({
   const [isDownloading, setIsDownloading] = useState(false);
   const [autoSwitch, setAutoSwitch] = useState(false);
   const [customColor, setCustomColor] = useState("#3b82f6");
-  const [colorType, setColorType] = useState("solid"); // solid or gradient
   const [selectedGradient, setSelectedGradient] = useState(presetGradients[0]);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [hue, setHue] = useState(220);
@@ -587,33 +586,20 @@ export const WallpaperSelectorDialog = ({
 
   // 获取当前分类和标签的壁纸
   const getFilteredWallpapers = () => {
+    debugger
     if (selectedCategory === "solid") {
-      if (colorType === "gradient") {
-        // 显示相似渐变色
-        const similarGradients = getSimilarGradients(selectedGradient);
-        return similarGradients.map(gradient => ({
-          id: gradient.id,
-          url: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><defs><linearGradient id="grad-${gradient.id}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${gradient.gradient.match(/#[a-fA-F0-9]{6}/g)?.[0] || '#000'};stop-opacity:1" /><stop offset="100%" style="stop-color:${gradient.gradient.match(/#[a-fA-F0-9]{6}/g)?.[1] || '#fff'};stop-opacity:1" /></linearGradient></defs><rect width="100%" height="100%" fill="url(#grad-${gradient.id})"/></svg>`,
-          title: gradient.name,
-          category: "solid",
-          tags: ["gradient"],
-          isColor: true,
-          color: gradient.gradient,
-          type: 'gradient'
-        }));
-      } else {
-        // 显示纯色
-        return solidColors.map(color => ({
-          id: color.id,
-          url: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="100%" height="100%" fill="${color.color}"/></svg>`,
-          title: color.name,
-          category: "solid",
-          tags: ["solid"],
-          isColor: true,
-          color: color.color,
-          type: 'solid'
-        }));
-      }
+      // 显示相似渐变色
+      const similarGradients = getSimilarGradients(selectedGradient);
+      return similarGradients.map(gradient => ({
+        id: gradient.id,
+        url: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><defs><linearGradient id="grad-${gradient.id}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${gradient.gradient.match(/#[a-fA-F0-9]{6}/g)?.[0] || '#000'};stop-opacity:1" /><stop offset="100%" style="stop-color:${gradient.gradient.match(/#[a-fA-F0-9]{6}/g)?.[1] || '#fff'};stop-opacity:1" /></linearGradient></defs><rect width="100%" height="100%" fill="url(#grad-${gradient.id})"/></svg>`,
+        title: gradient.name,
+        category: "solid",
+        tags: ["gradient"],
+        isColor: true,
+        color: gradient.gradient,
+        type: 'gradient'
+      }));
     }
 
     let filtered = wallpaperData.filter(item => 
@@ -935,7 +921,6 @@ export const WallpaperSelectorDialog = ({
                           style={{ background: gradient.gradient }}
                           onClick={() => {
                             setSelectedGradient(gradient);
-                            setColorType("gradient");
                             const customWallpaper = {
                               id: `custom-${Date.now()}`,
                               isColor: true,
@@ -956,7 +941,8 @@ export const WallpaperSelectorDialog = ({
                   <div
                     key={wallpaper.id}
                     className={cn(
-                      "relative rounded-lg overflow-hidden cursor-pointer border-2 transition-all hover:scale-105 group",
+                      "relative rounded-lg overflow-hidden cursor-pointer border-1 transition-all hover:scale-105 group",
+                      "h-[120px]"
                     )}
                     style={{
                       borderColor: (wallpaper.isColor ? wallpaper.color : wallpaper.url) === currentWallpaper 
