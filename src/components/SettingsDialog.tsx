@@ -314,15 +314,11 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
 
   // 从高级壁纸选择器选择壁纸
   const selectAdvancedWallpaper = (wallpaperUrl: string) => {
-    // 如果是纯色，创建渐变背景
-    let backgroundImage = wallpaperUrl;
-    if (wallpaperUrl.startsWith('#')) {
-      backgroundImage = `linear-gradient(135deg, ${wallpaperUrl}, ${wallpaperUrl})`;
-    }
-    
-    const newSettings = { ...settings, backgroundImage };
+    // 直接使用选择的颜色或渐变
+    const newSettings = { ...settings, backgroundImage: wallpaperUrl };
     saveSettings(newSettings);
-    setShowAdvancedWallpaperSelector(false);
+    // 不自动关闭弹框，由用户手动关闭
+    // setShowAdvancedWallpaperSelector(false);
   };
 
   // 下载当前壁纸
@@ -812,11 +808,23 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
       {/* 当前壁纸预览 */}
       <div className="space-y-3">
       <div className="aspect-video w-full max-w-sm rounded-lg overflow-hidden border border-white/20 relative">
-          <img
-            src={settings.backgroundImage}
-            alt="当前壁纸"
-            className="w-full h-full object-cover"
-          />
+          {/* 根据壁纸类型显示不同内容 */}
+          {settings.backgroundImage.startsWith('#') || settings.backgroundImage.startsWith('linear-gradient') ? (
+            <div 
+              className="w-full h-full"
+              style={{ 
+                background: settings.backgroundImage.startsWith('#') 
+                  ? settings.backgroundImage 
+                  : settings.backgroundImage
+              }}
+            />
+          ) : (
+            <img
+              src={settings.backgroundImage}
+              alt="当前壁纸"
+              className="w-full h-full object-cover"
+            />
+          )}
           <div 
             className="absolute inset-0 bg-black"
             style={{ opacity: settings.maskOpacity / 100 }}
