@@ -2,6 +2,14 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   X, 
   Download, 
@@ -11,7 +19,8 @@ import {
   Palette,
   Globe,
   History,
-  User
+  User,
+  Plus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -132,6 +141,16 @@ const wallpaperData: WallpaperItem[] = [
   },
 ];
 
+// 预设颜色选择器
+const presetColors = [
+  "#ff0000", "#ff4500", "#ffa500", "#ffff00", "#9acd32", "#00ff00",
+  "#00ffff", "#0000ff", "#8a2be2", "#ff1493", "#ff69b4", "#ffc0cb",
+  "#000000", "#696969", "#808080", "#a9a9a9", "#c0c0c0", "#ffffff",
+  "#8b4513", "#a0522d", "#cd853f", "#daa520", "#b8860b", "#228b22",
+  "#32cd32", "#7cfc00", "#00ced1", "#4169e1", "#6495ed", "#87ceeb",
+  "#9370db", "#ba55d3", "#da70d6", "#ee82ee", "#dda0dd", "#f0e68c"
+];
+
 // 纯色壁纸数据
 const solidColors = [
   { id: "solid-1", color: "#1e40af", name: "深蓝" },
@@ -143,6 +162,37 @@ const solidColors = [
   { id: "solid-7", color: "#4338ca", name: "靛蓝" },
   { id: "solid-8", color: "#be185d", name: "粉红" },
   { id: "solid-9", color: "#374151", name: "灰色" },
+  { id: "solid-10", color: "#000000", name: "纯黑" },
+  { id: "solid-11", color: "#ffffff", name: "纯白" },
+  { id: "solid-12", color: "#f59e0b", name: "金黄" },
+  { id: "solid-13", color: "#10b981", name: "薄荷绿" },
+  { id: "solid-14", color: "#8b5cf6", name: "淡紫" },
+  { id: "solid-15", color: "#f97316", name: "活力橙" },
+  { id: "solid-16", color: "#06b6d4", name: "天蓝" },
+  { id: "solid-17", color: "#84cc16", name: "柠檬绿" },
+  { id: "solid-18", color: "#ec4899", name: "玫瑰红" },
+];
+
+// 渐变色壁纸数据
+const gradientColors = [
+  { id: "gradient-1", gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", name: "紫蓝渐变" },
+  { id: "gradient-2", gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)", name: "粉红渐变" },
+  { id: "gradient-3", gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)", name: "蓝青渐变" },
+  { id: "gradient-4", gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)", name: "绿青渐变" },
+  { id: "gradient-5", gradient: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)", name: "粉黄渐变" },
+  { id: "gradient-6", gradient: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)", name: "薄荷粉渐变" },
+  { id: "gradient-7", gradient: "linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)", name: "珊瑚粉渐变" },
+  { id: "gradient-8", gradient: "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)", name: "桃橙渐变" },
+  { id: "gradient-9", gradient: "linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)", name: "紫粉渐变" },
+  { id: "gradient-10", gradient: "linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%)", name: "暖粉渐变" },
+  { id: "gradient-11", gradient: "linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)", name: "黄橙渐变" },
+  { id: "gradient-12", gradient: "linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)", name: "天空蓝渐变" },
+  { id: "gradient-13", gradient: "linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%)", name: "玫瑰金渐变" },
+  { id: "gradient-14", gradient: "linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)", name: "深紫渐变" },
+  { id: "gradient-15", gradient: "linear-gradient(135deg, #00b894 0%, #00cec9 100%)", name: "翡翠渐变" },
+  { id: "gradient-16", gradient: "linear-gradient(135deg, #e17055 0%, #f39c12 100%)", name: "夕阳渐变" },
+  { id: "gradient-17", gradient: "linear-gradient(135deg, #2d3436 0%, #636e72 100%)", name: "暗灰渐变" },
+  { id: "gradient-18", gradient: "linear-gradient(135deg, #00cec9 0%, #55a3ff 100%)", name: "冰蓝渐变" },
 ];
 
 export const WallpaperSelectorDialog = ({ 
@@ -156,19 +206,35 @@ export const WallpaperSelectorDialog = ({
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [autoSwitch, setAutoSwitch] = useState(false);
+  const [customColor, setCustomColor] = useState("#3b82f6");
+  const [colorType, setColorType] = useState("solid"); // solid or gradient
 
   // 获取当前分类和标签的壁纸
   const getFilteredWallpapers = () => {
     if (selectedCategory === "solid") {
-      return solidColors.map(color => ({
+      const solids = solidColors.map(color => ({
         id: color.id,
         url: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="100%" height="100%" fill="${color.color}"/></svg>`,
         title: color.name,
         category: "solid",
         tags: ["solid"],
         isColor: true,
-        color: color.color
+        color: color.color,
+        type: 'solid'
       }));
+      
+      const gradients = gradientColors.map(gradient => ({
+        id: gradient.id,
+        url: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><defs><linearGradient id="grad-${gradient.id}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${gradient.gradient.match(/#[a-fA-F0-9]{6}/g)?.[0] || '#000'};stop-opacity:1" /><stop offset="100%" style="stop-color:${gradient.gradient.match(/#[a-fA-F0-9]{6}/g)?.[1] || '#fff'};stop-opacity:1" /></linearGradient></defs><rect width="100%" height="100%" fill="url(#grad-${gradient.id})"/></svg>`,
+        title: gradient.name,
+        category: "solid",
+        tags: ["gradient"],
+        isColor: true,
+        color: gradient.gradient,
+        type: 'gradient'
+      }));
+      
+      return [...solids, ...gradients];
     }
 
     let filtered = wallpaperData.filter(item => 
@@ -300,7 +366,7 @@ export const WallpaperSelectorDialog = ({
           </div>
 
           {/* 右侧内容区域 */}
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col max-h-[90vh]">
             {/* 免责声明和顶部标签栏 */}
             <div className="border-b border-white/10">
               {/* 免责声明 */}
@@ -345,11 +411,84 @@ export const WallpaperSelectorDialog = ({
 
             {/* 壁纸网格 */}
             <div className="flex-1 p-3 overflow-y-auto">
-              <div className="grid grid-cols-4 gap-3">
+              {/* 纯色壁纸的自定义颜色选择器 */}
+              {selectedCategory === "solid" && (
+                <div className="mb-6 p-4 bg-white/5 rounded-lg border border-white/10">
+                  <h3 className="text-sm font-medium text-white mb-3">自定义颜色</h3>
+                  
+                  {/* 颜色类型选择 */}
+                  <div className="flex items-center gap-4 mb-3">
+                    <Select value={colorType} onValueChange={setColorType}>
+                      <SelectTrigger className="w-32 h-8 bg-white/10 border-white/20 text-white text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-white/20">
+                        <SelectItem value="solid" className="text-white hover:bg-white/10">纯色</SelectItem>
+                        <SelectItem value="gradient" className="text-white hover:bg-white/10">渐变</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* 预设颜色选择 */}
+                  <div className="mb-3">
+                    <div className="text-xs text-white/70 mb-2">快速选择</div>
+                    <div className="grid grid-cols-12 gap-1">
+                      {presetColors.map((color, index) => (
+                        <button
+                          key={index}
+                          className="w-6 h-6 rounded border border-white/20 hover:scale-110 transition-transform"
+                          style={{ backgroundColor: color }}
+                          onClick={() => setCustomColor(color)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* 自定义颜色输入和预览 */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="color"
+                        value={customColor}
+                        onChange={(e) => setCustomColor(e.target.value)}
+                        className="w-8 h-8 p-0 border-0 bg-transparent cursor-pointer"
+                      />
+                      <Input
+                        type="text"
+                        value={customColor}
+                        onChange={(e) => setCustomColor(e.target.value)}
+                        className="w-24 h-8 bg-white/10 border-white/20 text-white text-xs"
+                        placeholder="#ffffff"
+                      />
+                    </div>
+                    <Button
+                      size="sm"
+                      className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white text-xs"
+                      onClick={() => {
+                        const customWallpaper = {
+                          id: `custom-${Date.now()}`,
+                          isColor: true,
+                          color: customColor,
+                          type: 'solid'
+                        };
+                        selectWallpaper(customWallpaper);
+                      }}
+                    >
+                      <Plus className="w-3 h-3 mr-1" />
+                      应用
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
+              <div className="grid grid-cols-6 gap-3">
                 {filteredWallpapers.map((wallpaper) => (
                   <div
                     key={wallpaper.id}
-                    className="relative aspect-video rounded-lg overflow-hidden cursor-pointer border-2 transition-all hover:scale-105 group"
+                    className={cn(
+                      "relative rounded-lg overflow-hidden cursor-pointer border-2 transition-all hover:scale-105 group",
+                      selectedCategory === "solid" ? "aspect-square" : "aspect-video"
+                    )}
                     style={{
                       borderColor: (wallpaper.isColor ? wallpaper.color : wallpaper.url) === currentWallpaper 
                         ? '#3b82f6' 
@@ -360,7 +499,10 @@ export const WallpaperSelectorDialog = ({
                     {wallpaper.isColor ? (
                       <div 
                         className="w-full h-full"
-                        style={{ backgroundColor: wallpaper.color }}
+                        style={{ 
+                          background: wallpaper.type === 'gradient' ? wallpaper.color : undefined,
+                          backgroundColor: wallpaper.type === 'solid' ? wallpaper.color : undefined
+                        }}
                       />
                     ) : (
                       <img
@@ -368,6 +510,13 @@ export const WallpaperSelectorDialog = ({
                         alt={wallpaper.title}
                         className="w-full h-full object-cover"
                       />
+                    )}
+                    
+                    {/* 颜色名称标签 */}
+                    {wallpaper.isColor && selectedCategory === "solid" && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        {wallpaper.title}
+                      </div>
                     )}
                     
                     {/* 选中状态 */}
