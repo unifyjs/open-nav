@@ -152,6 +152,8 @@ export const BookmarkGrid = ({ category, onCategoryChange, categories = [] }: Bo
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [sidebarSettings, setSidebarSettings] = useState<{ scrollSwitch: boolean }>({ scrollSwitch: true });
   const [isScrolling, setIsScrolling] = useState(false);
+  const [animationDirection, setAnimationDirection] = useState<'from-top' | 'from-bottom' | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const gridRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -448,7 +450,7 @@ export const BookmarkGrid = ({ category, onCategoryChange, categories = [] }: Bo
     let scrollTimeout: NodeJS.Timeout;
     
     const handleScroll = () => {
-      if (isScrolling) return;
+      if (isScrolling || isAnimating) return;
       
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
       const isAtTop = scrollTop === 0;
@@ -463,29 +465,38 @@ export const BookmarkGrid = ({ category, onCategoryChange, categories = [] }: Bo
         if (currentIndex === -1) return;
         
         let targetIndex = -1;
+        let direction: 'from-top' | 'from-bottom' | null = null;
         
         if (isAtTop && currentIndex > 0) {
-          // 在顶部，切换到上一个分组
+          // 在顶部，切换到上一个分组，下一组从上方进入
           targetIndex = currentIndex - 1;
+          direction = 'from-top';
         } else if (isAtBottom && currentIndex < categories.length - 1) {
-          // 在底部，切换到下一个分组
+          // 在底部，切换到下一个分组，下一组从底部进入
           targetIndex = currentIndex + 1;
+          direction = 'from-bottom';
         }
         
-        if (targetIndex >= 0 && targetIndex < categories.length) {
+        if (targetIndex >= 0 && targetIndex < categories.length && direction) {
           setIsScrolling(true);
+          setIsAnimating(true);
+          setAnimationDirection(direction);
+          
+          // 切换分组
           onCategoryChange(categories[targetIndex].id);
           
-          // 防止频繁切换
+          // 动画结束后清理状态
           setTimeout(() => {
+            setIsAnimating(false);
+            setAnimationDirection(null);
             setIsScrolling(false);
-          }, 100);
+          }, 500); // 动画持续时间
         }
       }, 100); // 100ms 防抖
     };
 
     const handleWheel = (e: WheelEvent) => {
-      if (isScrolling) return;
+      if (isScrolling || isAnimating) return;
       
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
       const isAtTop = scrollTop === 0;
@@ -501,23 +512,32 @@ export const BookmarkGrid = ({ category, onCategoryChange, categories = [] }: Bo
           if (currentIndex === -1) return;
           
           let targetIndex = -1;
+          let direction: 'from-top' | 'from-bottom' | null = null;
           
           if (isAtTop && e.deltaY < 0 && currentIndex > 0) {
-            // 在顶部向上滚动，切换到上一个分组
+            // 在顶部向上滚动，切换到上一个分组，下一组从上方进入
             targetIndex = currentIndex - 1;
+            direction = 'from-top';
           } else if (isAtBottom && e.deltaY > 0 && currentIndex < categories.length - 1) {
-            // 在底部向下滚动，切换到下一个分组
+            // 在底部向下滚动，切换到下一个分组，下一组从底部进入
             targetIndex = currentIndex + 1;
+            direction = 'from-bottom';
           }
           
-          if (targetIndex >= 0 && targetIndex < categories.length) {
+          if (targetIndex >= 0 && targetIndex < categories.length && direction) {
             setIsScrolling(true);
+            setIsAnimating(true);
+            setAnimationDirection(direction);
+            
+            // 切换分组
             onCategoryChange(categories[targetIndex].id);
             
-            // 防止频繁切换
+            // 动画结束后清理状态
             setTimeout(() => {
+              setIsAnimating(false);
+              setAnimationDirection(null);
               setIsScrolling(false);
-            }, 100);
+            }, 500); // 动画持续时间
           }
         }, 100);
       }
@@ -531,7 +551,7 @@ export const BookmarkGrid = ({ category, onCategoryChange, categories = [] }: Bo
       scrollContainer.removeEventListener('wheel', handleWheel);
       clearTimeout(scrollTimeout);
     };
-  }, [sidebarSettings.scrollSwitch, onCategoryChange, categories, category, isScrolling]);
+  }, [sidebarSettings.scrollSwitch, onCategoryChange, categories, category, isScrolling, isAnimating]);
 
 // 响应式网格占位计算
   const getGridSpan = (size: string) => {
@@ -566,7 +586,10 @@ return (
     >
       <div 
         ref={gridRef} 
-        className={`grid relative`}
+        className={`grid relative transition-all duration-500 ease-out ${
+          animationDirection === 'from-top' ? 'animate-slide-in-from-top' : 
+          animationDirection === 'from-bottom' ? 'animate-slide-in-from-bottom' : ''
+        }`}
         style={{ 
           gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))`,
           gap: `${Math.max(iconSettings.iconSpacing * (isMobile ? 0.5 : isTablet ? 0.75 : 1), 8)}px` 
