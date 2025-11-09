@@ -78,6 +78,7 @@ const getTagColor = (tagId: string) => {
 
 // 示例壁纸数据
 const wallpaperData: WallpaperItem[] = [
+  // 精选壁纸 - 增加到20个
   {
     id: "1",
     url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop",
@@ -122,24 +123,193 @@ const wallpaperData: WallpaperItem[] = [
   },
   {
     id: "7",
+    url: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&h=1080&fit=crop",
+    title: "薰衣草田",
+    category: "featured",
+    tags: ["landscape", "healing"]
+  },
+  {
+    id: "8",
+    url: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=1920&h=1080&fit=crop",
+    title: "森林阳光",
+    category: "featured",
+    tags: ["landscape", "healing"]
+  },
+  {
+    id: "9",
+    url: "https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=1920&h=1080&fit=crop",
+    title: "湖光山色",
+    category: "featured",
+    tags: ["landscape", "healing"]
+  },
+  {
+    id: "10",
+    url: "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=1920&h=1080&fit=crop",
+    title: "海边日落",
+    category: "featured",
+    tags: ["landscape", "healing"]
+  },
+  {
+    id: "11",
+    url: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1920&h=1080&fit=crop",
+    title: "沙漠风光",
+    category: "featured",
+    tags: ["landscape", "other"]
+  },
+  {
+    id: "12",
+    url: "https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?w=1920&h=1080&fit=crop",
+    title: "雪山美景",
+    category: "featured",
+    tags: ["landscape", "healing"]
+  },
+  {
+    id: "13",
+    url: "https://images.unsplash.com/photo-1587491618720-c79922211e02?w=1920&h=1080&fit=crop",
+    title: "森林瀑布",
+    category: "featured",
+    tags: ["landscape", "healing"]
+  },
+  {
+    id: "14",
+    url: "https://images.unsplash.com/photo-1590252497717-dc039b62f57e?w=1920&h=1080&fit=crop",
+    title: "高山草甸",
+    category: "featured",
+    tags: ["landscape", "healing"]
+  },
+  {
+    id: "15",
+    url: "https://images.unsplash.com/photo-1759242521221-addf4bffe229?w=1920&h=1080&fit=crop",
+    title: "田园风光",
+    category: "featured",
+    tags: ["landscape", "healing"]
+  },
+  {
+    id: "16",
+    url: "https://images.unsplash.com/photo-1653296596155-28a84c0964c3?w=1920&h=1080&fit=crop",
+    title: "樱花盛开",
+    category: "featured",
+    tags: ["landscape", "healing"]
+  },
+  {
+    id: "17",
+    url: "https://images.unsplash.com/photo-1565178117145-41db4d572950?w=1920&h=1080&fit=crop",
+    title: "竹林幽径",
+    category: "featured",
+    tags: ["landscape", "healing"]
+  },
+  {
+    id: "18",
+    url: "https://images.unsplash.com/photo-1655832637772-aea7be2eeb66?w=1920&h=1080&fit=crop",
+    title: "银河星空",
+    category: "featured",
+    tags: ["landscape", "other"]
+  },
+  // 动态壁纸 - 增加到15个
+  {
+    id: "21",
     url: "https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=1920&h=1080&fit=crop",
     title: "城市夜景",
     category: "dynamic",
     tags: ["other", "landscape"]
   },
   {
-    id: "8",
+    id: "22",
     url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop",
     title: "动漫风景",
     category: "dynamic",
     tags: ["anime", "landscape"]
   },
   {
-    id: "9",
+    id: "23",
     url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&h=1080&fit=crop",
     title: "游戏场景",
     category: "dynamic",
     tags: ["game", "other"]
+  },
+  {
+    id: "24",
+    url: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=1920&h=1080&fit=crop",
+    title: "科幻城市",
+    category: "dynamic",
+    tags: ["other", "game"]
+  },
+  {
+    id: "25",
+    url: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1920&h=1080&fit=crop",
+    title: "赛博朋克",
+    category: "dynamic",
+    tags: ["other", "game"]
+  },
+  {
+    id: "26",
+    url: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&h=1080&fit=crop",
+    title: "动漫少女",
+    category: "dynamic",
+    tags: ["anime", "beauty"]
+  },
+  {
+    id: "27",
+    url: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=1920&h=1080&fit=crop",
+    title: "魔法世界",
+    category: "dynamic",
+    tags: ["anime", "game"]
+  },
+  {
+    id: "28",
+    url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop",
+    title: "机甲战士",
+    category: "dynamic",
+    tags: ["game", "other"]
+  },
+  {
+    id: "29",
+    url: "https://images.unsplash.com/photo-1760828142299-e64456115aa2?w=1920&h=1080&fit=crop",
+    title: "未来都市",
+    category: "dynamic",
+    tags: ["other", "game"]
+  },
+  {
+    id: "30",
+    url: "https://images.unsplash.com/photo-1713173642147-30cbbdb176d5?w=1920&h=1080&fit=crop",
+    title: "动漫风景",
+    category: "dynamic",
+    tags: ["anime", "landscape"]
+  },
+  {
+    id: "31",
+    url: "https://images.unsplash.com/photo-1723962807917-ffab0600929c?w=1920&h=1080&fit=crop",
+    title: "电竞主题",
+    category: "dynamic",
+    tags: ["game", "other"]
+  },
+  {
+    id: "32",
+    url: "https://images.unsplash.com/photo-1699294648710-32f8c4dc5dd6?w=1920&h=1080&fit=crop",
+    title: "霓虹灯光",
+    category: "dynamic",
+    tags: ["other", "landscape"]
+  },
+  {
+    id: "33",
+    url: "https://images.unsplash.com/photo-1516865131505-4dabf2efc692?w=1920&h=1080&fit=crop",
+    title: "动漫角色",
+    category: "dynamic",
+    tags: ["anime", "beauty"]
+  },
+  {
+    id: "34",
+    url: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1920&h=1080&fit=crop",
+    title: "游戏CG",
+    category: "dynamic",
+    tags: ["game", "other"]
+  },
+  {
+    id: "35",
+    url: "https://images.unsplash.com/photo-1500674425229-f692875b0ab7?w=1920&h=1080&fit=crop",
+    title: "科技感",
+    category: "dynamic",
+    tags: ["other", "game"]
   },
 ];
 
@@ -781,13 +951,12 @@ export const WallpaperSelectorDialog = ({
                 </div>
               )}
               
-              <div className="grid grid-cols-6 gap-3">
+              <div className="grid grid-cols-4 gap-4">
                 {filteredWallpapers.map((wallpaper) => (
                   <div
                     key={wallpaper.id}
                     className={cn(
                       "relative rounded-lg overflow-hidden cursor-pointer border-2 transition-all hover:scale-105 group",
-                      selectedCategory === "solid" ? "aspect-square" : "aspect-video"
                     )}
                     style={{
                       borderColor: (wallpaper.isColor ? wallpaper.color : wallpaper.url) === currentWallpaper 
