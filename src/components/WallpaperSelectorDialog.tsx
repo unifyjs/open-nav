@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
   X, 
   Download, 
@@ -20,7 +21,8 @@ import {
   Globe,
   History,
   User,
-  Plus
+  Plus,
+  Pipette
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -141,14 +143,37 @@ const wallpaperData: WallpaperItem[] = [
   },
 ];
 
-// 预设颜色选择器
-const presetColors = [
+// 预设颜色选择器 - 第一行自定义颜色
+const customColors = [
+  "#ff4757", "#ff6b81", "#ff9ff3", "#54a0ff", "#5f27cd", 
+  "#00d2d3", "#ff9f43", "#10ac84", "#ee5a24", "#0984e3",
+  "#a29bfe", "#fd79a8", "#fdcb6e", "#6c5ce7", "#fd79a8"
+];
+
+// 预设渐变色选择器 - 第二行渐变色
+const presetGradients = [
+  { id: "g1", gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", name: "紫蓝" },
+  { id: "g2", gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)", name: "粉红" },
+  { id: "g3", gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)", name: "蓝青" },
+  { id: "g4", gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)", name: "绿青" },
+  { id: "g5", gradient: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)", name: "粉黄" },
+  { id: "g6", gradient: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)", name: "薄荷粉" },
+  { id: "g7", gradient: "linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)", name: "珊瑚粉" },
+  { id: "g8", gradient: "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)", name: "桃橙" },
+  { id: "g9", gradient: "linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)", name: "紫粉" },
+  { id: "g10", gradient: "linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%)", name: "暖粉" },
+  { id: "g11", gradient: "linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)", name: "黄橙" },
+  { id: "g12", gradient: "linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)", name: "天空蓝" },
+  { id: "g13", gradient: "linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%)", name: "玫瑰金" },
+  { id: "g14", gradient: "linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)", name: "深紫" },
+  { id: "g15", gradient: "linear-gradient(135deg, #00b894 0%, #00cec9 100%)", name: "翡翠" }
+];
+
+// 颜色选择器常用颜色
+const commonColors = [
   "#ff0000", "#ff4500", "#ffa500", "#ffff00", "#9acd32", "#00ff00",
   "#00ffff", "#0000ff", "#8a2be2", "#ff1493", "#ff69b4", "#ffc0cb",
-  "#000000", "#696969", "#808080", "#a9a9a9", "#c0c0c0", "#ffffff",
-  "#8b4513", "#a0522d", "#cd853f", "#daa520", "#b8860b", "#228b22",
-  "#32cd32", "#7cfc00", "#00ced1", "#4169e1", "#6495ed", "#87ceeb",
-  "#9370db", "#ba55d3", "#da70d6", "#ee82ee", "#dda0dd", "#f0e68c"
+  "#000000", "#696969", "#808080", "#a9a9a9", "#c0c0c0", "#ffffff"
 ];
 
 // 纯色壁纸数据
@@ -208,33 +233,47 @@ export const WallpaperSelectorDialog = ({
   const [autoSwitch, setAutoSwitch] = useState(false);
   const [customColor, setCustomColor] = useState("#3b82f6");
   const [colorType, setColorType] = useState("solid"); // solid or gradient
+  const [selectedGradient, setSelectedGradient] = useState(presetGradients[0]);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [hue, setHue] = useState(220);
+  const [saturation, setSaturation] = useState(100);
+  const [lightness, setLightness] = useState(50);
+
+  // 获取相似渐变色
+  const getSimilarGradients = (baseGradient: typeof presetGradients[0]) => {
+    // 简单的相似度匹配，实际可以根据颜色相似度来匹配
+    return gradientColors.filter(g => g.id !== baseGradient.id).slice(0, 12);
+  };
 
   // 获取当前分类和标签的壁纸
   const getFilteredWallpapers = () => {
     if (selectedCategory === "solid") {
-      const solids = solidColors.map(color => ({
-        id: color.id,
-        url: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="100%" height="100%" fill="${color.color}"/></svg>`,
-        title: color.name,
-        category: "solid",
-        tags: ["solid"],
-        isColor: true,
-        color: color.color,
-        type: 'solid'
-      }));
-      
-      const gradients = gradientColors.map(gradient => ({
-        id: gradient.id,
-        url: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><defs><linearGradient id="grad-${gradient.id}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${gradient.gradient.match(/#[a-fA-F0-9]{6}/g)?.[0] || '#000'};stop-opacity:1" /><stop offset="100%" style="stop-color:${gradient.gradient.match(/#[a-fA-F0-9]{6}/g)?.[1] || '#fff'};stop-opacity:1" /></linearGradient></defs><rect width="100%" height="100%" fill="url(#grad-${gradient.id})"/></svg>`,
-        title: gradient.name,
-        category: "solid",
-        tags: ["gradient"],
-        isColor: true,
-        color: gradient.gradient,
-        type: 'gradient'
-      }));
-      
-      return [...solids, ...gradients];
+      if (colorType === "gradient") {
+        // 显示相似渐变色
+        const similarGradients = getSimilarGradients(selectedGradient);
+        return similarGradients.map(gradient => ({
+          id: gradient.id,
+          url: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><defs><linearGradient id="grad-${gradient.id}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${gradient.gradient.match(/#[a-fA-F0-9]{6}/g)?.[0] || '#000'};stop-opacity:1" /><stop offset="100%" style="stop-color:${gradient.gradient.match(/#[a-fA-F0-9]{6}/g)?.[1] || '#fff'};stop-opacity:1" /></linearGradient></defs><rect width="100%" height="100%" fill="url(#grad-${gradient.id})"/></svg>`,
+          title: gradient.name,
+          category: "solid",
+          tags: ["gradient"],
+          isColor: true,
+          color: gradient.gradient,
+          type: 'gradient'
+        }));
+      } else {
+        // 显示纯色
+        return solidColors.map(color => ({
+          id: color.id,
+          url: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="100%" height="100%" fill="${color.color}"/></svg>`,
+          title: color.name,
+          category: "solid",
+          tags: ["solid"],
+          isColor: true,
+          color: color.color,
+          type: 'solid'
+        }));
+      }
     }
 
     let filtered = wallpaperData.filter(item => 
@@ -369,10 +408,12 @@ export const WallpaperSelectorDialog = ({
           <div className="flex-1 flex flex-col max-h-[90vh]">
             {/* 免责声明和顶部标签栏 */}
             <div className="border-b border-white/10">
-              {/* 免责声明 */}
-              <div className="px-4 py-2 text-xs text-white/60 bg-white/5">
-                PS: 此壁纸收集于互联网，如有侵权，请联系作者
-              </div>
+              {/* 免责声明 - 仅在非纯色时显示 */}
+              {selectedCategory !== "solid" && (
+                <div className="px-4 py-2 text-xs text-white/60 bg-white/5">
+                  PS: 此壁纸收集于互联网，如有侵权，请联系作者
+                </div>
+              )}
               
               {/* 标签栏 */}
               {selectedCategory !== "solid" && (
@@ -413,70 +454,196 @@ export const WallpaperSelectorDialog = ({
             <div className="flex-1 p-3 overflow-y-auto">
               {/* 纯色壁纸的自定义颜色选择器 */}
               {selectedCategory === "solid" && (
-                <div className="mb-6 p-4 bg-white/5 rounded-lg border border-white/10">
-                  <h3 className="text-sm font-medium text-white mb-3">自定义颜色</h3>
-                  
-                  {/* 颜色类型选择 */}
-                  <div className="flex items-center gap-4 mb-3">
-                    <Select value={colorType} onValueChange={setColorType}>
-                      <SelectTrigger className="w-32 h-8 bg-white/10 border-white/20 text-white text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-white/20">
-                        <SelectItem value="solid" className="text-white hover:bg-white/10">纯色</SelectItem>
-                        <SelectItem value="gradient" className="text-white hover:bg-white/10">渐变</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  {/* 预设颜色选择 */}
-                  <div className="mb-3">
-                    <div className="text-xs text-white/70 mb-2">快速选择</div>
-                    <div className="grid grid-cols-12 gap-1">
-                      {presetColors.map((color, index) => (
+                <div className="mb-6 space-y-4">
+                  {/* 第一行：自定义颜色 */}
+                  <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                    <h3 className="text-sm font-medium text-white mb-3">自定义颜色</h3>
+                    <div className="flex items-center gap-2">
+                      {/* 自定义颜色选择器弹窗 */}
+                      <Popover open={showColorPicker} onOpenChange={setShowColorPicker}>
+                        <PopoverTrigger asChild>
+                          <button className="w-8 h-8 rounded-full border-2 border-white/30 hover:border-white/50 transition-colors overflow-hidden relative">
+                            <div className="w-full h-full bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-cyan-500 via-blue-500 to-purple-500"></div>
+                            <Pipette className="absolute inset-0 w-4 h-4 m-auto text-white drop-shadow-lg" />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 p-4 bg-slate-800 border-white/20" side="bottom" align="start">
+                          <div className="space-y-4">
+                            {/* 色相/饱和度选择区域 */}
+                            <div className="relative w-full h-40 rounded-lg overflow-hidden cursor-crosshair"
+                                 style={{
+                                   background: `linear-gradient(to right, white, hsl(${hue}, 100%, 50%)), linear-gradient(to top, black, transparent)`
+                                 }}
+                                 onClick={(e) => {
+                                   const rect = e.currentTarget.getBoundingClientRect();
+                                   const x = e.clientX - rect.left;
+                                   const y = e.clientY - rect.top;
+                                   const newSaturation = Math.round((x / rect.width) * 100);
+                                   const newLightness = Math.round(100 - (y / rect.height) * 100);
+                                   setSaturation(newSaturation);
+                                   setLightness(newLightness);
+                                   setCustomColor(`hsl(${hue}, ${newSaturation}%, ${newLightness}%)`);
+                                 }}>
+                              <div className="absolute w-3 h-3 border-2 border-white rounded-full transform -translate-x-1/2 -translate-y-1/2"
+                                   style={{
+                                     left: `${saturation}%`,
+                                     top: `${100 - lightness}%`
+                                   }}></div>
+                            </div>
+                            
+                            {/* 色相条 */}
+                            <div className="relative w-full h-4 rounded cursor-pointer"
+                                 style={{
+                                   background: 'linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)'
+                                 }}
+                                 onClick={(e) => {
+                                   const rect = e.currentTarget.getBoundingClientRect();
+                                   const x = e.clientX - rect.left;
+                                   const newHue = Math.round((x / rect.width) * 360);
+                                   setHue(newHue);
+                                   setCustomColor(`hsl(${newHue}, ${saturation}%, ${lightness}%)`);
+                                 }}>
+                              <div className="absolute w-3 h-6 border-2 border-white rounded transform -translate-x-1/2 -translate-y-1/2 top-1/2"
+                                   style={{ left: `${(hue / 360) * 100}%` }}></div>
+                            </div>
+                            
+                            {/* 常用颜色 */}
+                            <div className="grid grid-cols-9 gap-1">
+                              {commonColors.map((color, index) => (
+                                <button
+                                  key={index}
+                                  className="w-6 h-6 rounded border border-white/20 hover:scale-110 transition-transform"
+                                  style={{ backgroundColor: color }}
+                                  onClick={() => {
+                                    setCustomColor(color);
+                                    const customWallpaper = {
+                                      id: `custom-${Date.now()}`,
+                                      isColor: true,
+                                      color: color,
+                                      type: 'solid'
+                                    };
+                                    selectWallpaper(customWallpaper);
+                                    setShowColorPicker(false);
+                                  }}
+                                />
+                              ))}
+                            </div>
+                            
+                            {/* 颜色输入框 */}
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="text"
+                                value={customColor}
+                                onChange={(e) => setCustomColor(e.target.value)}
+                                className="flex-1 h-8 bg-white/10 border-white/20 text-white text-xs"
+                                placeholder="#ffffff"
+                              />
+                              <Button
+                                size="sm"
+                                className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white text-xs"
+                                onClick={() => {
+                                  const customWallpaper = {
+                                    id: `custom-${Date.now()}`,
+                                    isColor: true,
+                                    color: customColor,
+                                    type: 'solid'
+                                  };
+                                  selectWallpaper(customWallpaper);
+                                  setShowColorPicker(false);
+                                }}
+                              >
+                                确定
+                              </Button>
+                            </div>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                      
+                      {/* 预设自定义颜色 */}
+                      {customColors.map((color, index) => (
                         <button
                           key={index}
-                          className="w-6 h-6 rounded border border-white/20 hover:scale-110 transition-transform"
+                          className="w-8 h-8 rounded-full border-2 border-white/30 hover:border-white/50 transition-colors hover:scale-110"
                           style={{ backgroundColor: color }}
-                          onClick={() => setCustomColor(color)}
+                          onClick={() => {
+                            const customWallpaper = {
+                              id: `custom-${Date.now()}`,
+                              isColor: true,
+                              color: color,
+                              type: 'solid'
+                            };
+                            selectWallpaper(customWallpaper);
+                          }}
                         />
                       ))}
                     </div>
                   </div>
                   
-                  {/* 自定义颜色输入和预览 */}
-                  <div className="flex items-center gap-3">
+                  {/* 第二行：渐变色 */}
+                  <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                    <h3 className="text-sm font-medium text-white mb-3">渐变色</h3>
                     <div className="flex items-center gap-2">
-                      <Input
-                        type="color"
-                        value={customColor}
-                        onChange={(e) => setCustomColor(e.target.value)}
-                        className="w-8 h-8 p-0 border-0 bg-transparent cursor-pointer"
-                      />
-                      <Input
-                        type="text"
-                        value={customColor}
-                        onChange={(e) => setCustomColor(e.target.value)}
-                        className="w-24 h-8 bg-white/10 border-white/20 text-white text-xs"
-                        placeholder="#ffffff"
-                      />
+                      {presetGradients.map((gradient, index) => (
+                        <button
+                          key={index}
+                          className={cn(
+                            "w-8 h-8 rounded-full border-2 transition-all hover:scale-110",
+                            selectedGradient.id === gradient.id 
+                              ? "border-blue-400 ring-2 ring-blue-400/50" 
+                              : "border-white/30 hover:border-white/50"
+                          )}
+                          style={{ background: gradient.gradient }}
+                          onClick={() => {
+                            setSelectedGradient(gradient);
+                            setColorType("gradient");
+                            const customWallpaper = {
+                              id: `custom-${Date.now()}`,
+                              isColor: true,
+                              color: gradient.gradient,
+                              type: 'gradient'
+                            };
+                            selectWallpaper(customWallpaper);
+                          }}
+                        />
+                      ))}
                     </div>
-                    <Button
-                      size="sm"
-                      className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white text-xs"
-                      onClick={() => {
-                        const customWallpaper = {
-                          id: `custom-${Date.now()}`,
-                          isColor: true,
-                          color: customColor,
-                          type: 'solid'
-                        };
-                        selectWallpaper(customWallpaper);
-                      }}
-                    >
-                      <Plus className="w-3 h-3 mr-1" />
-                      应用
-                    </Button>
+                  </div>
+                  
+                  {/* 颜色类型选择 */}
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant={colorType === "solid" ? "default" : "ghost"}
+                        size="sm"
+                        className={cn(
+                          "h-8 px-3 text-xs",
+                          colorType === "solid" 
+                            ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                            : "text-white/70 hover:text-white hover:bg-white/10"
+                        )}
+                        onClick={() => setColorType("solid")}
+                      >
+                        纯色
+                      </Button>
+                      <Button
+                        variant={colorType === "gradient" ? "default" : "ghost"}
+                        size="sm"
+                        className={cn(
+                          "h-8 px-3 text-xs",
+                          colorType === "gradient" 
+                            ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                            : "text-white/70 hover:text-white hover:bg-white/10"
+                        )}
+                        onClick={() => setColorType("gradient")}
+                      >
+                        渐变色
+                      </Button>
+                    </div>
+                    {colorType === "gradient" && (
+                      <div className="text-xs text-white/60">
+                        当前选择：{selectedGradient.name}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
