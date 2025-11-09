@@ -51,6 +51,20 @@ const contentTags = [
   { id: "other", label: "其他" },
 ];
 
+// 标签颜色配置
+const getTagColor = (tagId: string) => {
+  const colors: { [key: string]: string } = {
+    "all": "bg-blue-600 text-white hover:bg-blue-700",
+    "healing": "bg-green-600 text-white hover:bg-green-700",
+    "landscape": "bg-purple-600 text-white hover:bg-purple-700",
+    "beauty": "bg-pink-600 text-white hover:bg-pink-700",
+    "anime": "bg-indigo-600 text-white hover:bg-indigo-700",
+    "game": "bg-orange-600 text-white hover:bg-orange-700",
+    "other": "bg-gray-600 text-white hover:bg-gray-700",
+  };
+  return colors[tagId] || "bg-blue-600 text-white hover:bg-blue-700";
+};
+
 // 示例壁纸数据
 const wallpaperData: WallpaperItem[] = [
   {
@@ -251,15 +265,14 @@ export const WallpaperSelectorDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl min-h-[80vh] max-h-[80vh] p-0 bg-white border border-gray-200 text-gray-900 fixed">
-        {/* 标题栏 */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium">壁纸</h2>
-        </div>
-
+      <DialogContent className="max-w-6xl min-h-[90vh] max-h-[90vh] p-0 bg-slate-800/60 backdrop-blur-sm border border-white/20 text-white fixed">
         <div className="flex h-full">
           {/* 左侧分类导航 */}
-          <div className="w-48 border-r border-gray-200 flex flex-col">
+          <div className="w-48 border-r border-white/10 flex flex-col">
+            {/* 标题栏 */}
+            <div className="p-4 border-b border-white/10">
+              <h2 className="text-lg font-medium text-white">壁纸库</h2>
+            </div>
             <div className="flex-1 py-2">
               {wallpaperCategories.map((category) => {
                 const Icon = category.icon;
@@ -270,8 +283,8 @@ export const WallpaperSelectorDialog = ({
                     key={category.id}
                     variant="ghost"
                     className={cn(
-                      "w-full justify-start h-10 px-4 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors rounded-none",
-                      isSelected && "bg-blue-50 text-blue-600 border-r-2 border-blue-600"
+                      "w-full justify-start h-10 px-4 text-white/80 hover:text-white hover:bg-white/10 transition-colors rounded-none",
+                      isSelected && "bg-white/20 text-white border-r-2 border-blue-500"
                     )}
                     onClick={() => {
                       setSelectedCategory(category.id);
@@ -288,31 +301,51 @@ export const WallpaperSelectorDialog = ({
 
           {/* 右侧内容区域 */}
           <div className="flex-1 flex flex-col">
-            {/* 顶部标签栏 */}
-            {selectedCategory !== "solid" && (
-              <div className="flex items-center gap-1 p-4 border-b border-gray-200">
-                {contentTags.map((tag) => (
-                  <Button
-                    key={tag.id}
-                    variant={selectedTag === tag.id ? "default" : "ghost"}
-                    size="sm"
-                    className={cn(
-                      "h-8 px-3 text-sm rounded-full",
-                      selectedTag === tag.id 
-                        ? "bg-blue-600 text-white hover:bg-blue-700" 
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                    )}
-                    onClick={() => setSelectedTag(tag.id)}
-                  >
-                    {tag.label}
-                  </Button>
-                ))}
+            {/* 免责声明和顶部标签栏 */}
+            <div className="border-b border-white/10">
+              {/* 免责声明 */}
+              <div className="px-4 py-2 text-xs text-white/60 bg-white/5">
+                PS: 此壁纸收集于互联网，如有侵权，请联系作者
               </div>
-            )}
+              
+              {/* 标签栏 */}
+              {selectedCategory !== "solid" && (
+                <div className="flex items-center justify-between px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    {contentTags.map((tag) => (
+                      <Button
+                        key={tag.id}
+                        variant={selectedTag === tag.id ? "default" : "ghost"}
+                        size="sm"
+                        className={cn(
+                          "h-7 px-3 text-xs rounded-full",
+                          selectedTag === tag.id 
+                            ? getTagColor(tag.id)
+                            : "text-white/70 hover:text-white hover:bg-white/10 border border-white/20"
+                        )}
+                        onClick={() => setSelectedTag(tag.id)}
+                      >
+                        {tag.label}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  {/* 最新开关 */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-white/70">最新</span>
+                    <Switch
+                      checked={autoSwitch}
+                      onCheckedChange={setAutoSwitch}
+                      className="scale-75"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* 壁纸网格 */}
-            <div className="flex-1 p-4 overflow-y-auto">
-              <div className="grid grid-cols-3 gap-4">
+            <div className="flex-1 p-3 overflow-y-auto">
+              <div className="grid grid-cols-4 gap-3">
                 {filteredWallpapers.map((wallpaper) => (
                   <div
                     key={wallpaper.id}
@@ -320,7 +353,7 @@ export const WallpaperSelectorDialog = ({
                     style={{
                       borderColor: (wallpaper.isColor ? wallpaper.color : wallpaper.url) === currentWallpaper 
                         ? '#3b82f6' 
-                        : '#e5e7eb'
+                        : '#374151'
                     }}
                     onClick={() => selectWallpaper(wallpaper)}
                   >
@@ -340,52 +373,29 @@ export const WallpaperSelectorDialog = ({
                     {/* 选中状态 */}
                     {(wallpaper.isColor ? wallpaper.color : wallpaper.url) === currentWallpaper && (
                       <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center">
-                        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                          <Check className="w-4 h-4 text-white" />
+                        <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                          <Check className="w-3 h-3 text-white" />
                         </div>
                       </div>
                     )}
 
                     {/* 下载按钮 */}
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         variant="secondary"
                         size="sm"
-                        className="h-6 w-6 p-0 bg-white/80 hover:bg-white"
+                        className="h-5 w-5 p-0 bg-black/60 hover:bg-black/80 border-0"
                         onClick={(e) => {
                           e.stopPropagation();
                           downloadWallpaper(wallpaper.url, wallpaper.title);
                         }}
                       >
-                        <Download className="h-3 w-3" />
+                        <Download className="h-2.5 w-2.5 text-white" />
                       </Button>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-
-          {/* 最右侧功能区域 */}
-          <div className="w-32 border-l border-gray-200 p-4 flex flex-col items-center space-y-4">
-            <Button
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm"
-              disabled={isDownloading}
-            >
-              下载壁纸
-            </Button>
-            
-            <div className="text-center text-sm text-gray-500">
-              <div>{isDownloading ? `${downloadProgress}%` : "0%"}</div>
-              <div>0px</div>
-            </div>
-            
-            <div className="flex flex-col items-center space-y-2">
-              <Switch
-                checked={autoSwitch}
-                onCheckedChange={setAutoSwitch}
-              />
-              <span className="text-xs text-gray-500 text-center">自动切换</span>
             </div>
           </div>
         </div>
