@@ -479,7 +479,7 @@ export const BookmarkGrid = ({ category, onCategoryChange, categories = [] }: Bo
           // 防止频繁切换
           setTimeout(() => {
             setIsScrolling(false);
-          }, 500);
+          }, 100);
         }
       }, 100); // 100ms 防抖
     };
@@ -517,7 +517,7 @@ export const BookmarkGrid = ({ category, onCategoryChange, categories = [] }: Bo
             // 防止频繁切换
             setTimeout(() => {
               setIsScrolling(false);
-            }, 500);
+            }, 100);
           }
         }, 100);
       }
@@ -566,7 +566,7 @@ return (
     >
       <div 
         ref={gridRef} 
-        className={`grid auto-rows-[80px] relative`}
+        className={`grid relative`}
         style={{ 
           gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))`,
           gap: `${Math.max(iconSettings.iconSpacing * (isMobile ? 0.5 : isTablet ? 0.75 : 1), 8)}px` 

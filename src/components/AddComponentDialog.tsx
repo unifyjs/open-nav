@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { X, Plus, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { CustomIconForm, CustomIconData } from "@/components/CustomIconForm";
 import { toast } from "@/hooks/use-toast";
 import { CustomIconStorage } from "@/lib/customIconStorage";
@@ -348,177 +349,210 @@ export const AddComponentDialog = ({ open, onOpenChange, onAddComponent, current
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[100vh] p-0">
-        <div className="flex flex-col h-[80vh]">
-          {/* Header */}
-          <DialogHeader className="p-3 border-b">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl font-semibold">添加组件</DialogTitle>
+      <DialogContent className="max-w-4xl min-h-[90vh] max-h-[90vh] p-0 bg-slate-800/60 backdrop-blur-sm border border-white/20 text-white fixed">
+        <div className="flex h-full max-h-[90vh]">
+          {/* 左侧导航选项 */}
+          <div className="w-48 border-r border-white/10 flex flex-col">
+            <div className="p-4 border-b border-white/10 flex items-center justify-between">
+              <h2 className="text-lg font-medium text-white">添加组件</h2>
             </div>
-          </DialogHeader>
-
-          {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="components">组件库</TabsTrigger>
-              <TabsTrigger value="navigation">网址导航</TabsTrigger>
-              <TabsTrigger value="custom">自定义图标</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="components" className="flex-1 flex flex-col mt-0">
-              {/* Category Filter */}
-              <div className="px-6 py-4 border-b">
-                <div className="flex flex-wrap gap-2">
-                  {componentCategories.map((category) => (
-                    <Badge
-                      key={category.id}
-                      variant={selectedCategory === category.id ? "default" : "outline"}
-                      className={`cursor-pointer transition-colors ${
-                        selectedCategory === category.id 
-                          ? 'bg-blue-600 text-white' 
-                          : 'hover:bg-gray-100'
-                      }`}
-                      onClick={() => setSelectedCategory(category.id)}
-                    >
-                      {category.label}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              {/* Components Grid */}
-              <div className="flex-1 p-6 hide-scrollbar max-h-[50vh] overflow-y-auto">
-                <div className="grid grid-cols-2 gap-4">
-                  {filteredComponents.map((component) => (
-                    <div
-                      key={component.id}
-                      className="relative bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div 
-                          className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
-                          style={{ backgroundColor: component.color }}
-                        >
-                          {component.icon}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-gray-900 mb-1">
-                            {component.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 line-clamp-2">
-                            {component.description}
-                          </p>
-                        </div>
-                        <Button
-                          size="sm"
-                          className="w-8 h-8 p-0 rounded-full bg-blue-600 hover:bg-blue-700 flex-shrink-0"
-                          onClick={() => handleAddComponent(component)}
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="navigation" className="flex-1 flex flex-col mt-0">
-              {/* Search Bar */}
-              <div className="px-0 py-1 border-b">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    placeholder="请输入搜索名称"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              {/* Website Category Filter */}
-              <div className="px-6 py-4 border-b">
-                <div className="flex flex-wrap gap-2">
-                  {websiteData?.categories.map((category) => (
-                    <Badge
-                      key={category.id}
-                      variant={selectedWebsiteCategory === category.id ? "default" : "outline"}
-                      className={`cursor-pointer transition-colors ${
-                        selectedWebsiteCategory === category.id 
-                          ? 'bg-blue-600 text-white' 
-                          : 'hover:bg-gray-100'
-                      }`}
-                      onClick={() => setSelectedWebsiteCategory(category.id)}
-                    >
-                      {category.label}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              {/* Websites Grid */}
-              <div className="flex-1 p-6 hide-scrollbar max-h-[40vh]  overflow-y-auto">
-                <div className="grid grid-cols-2 gap-4">
-                  {filteredWebsites.map((website) => (
-                    <div
-                      key={website.id}
-                      className="relative bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div 
-                          className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
-                          style={{ backgroundColor: website.color }}
-                        >
-                          <img 
-                            src={website.icon} 
-                            alt={website.title}
-                            className="w-8 h-8 object-contain"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              const parent = target.parentElement;
-                              if (parent) {
-                                parent.innerHTML = `<span class="text-white font-bold text-lg">${website.title.charAt(0)}</span>`;
-                              }
-                            }}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-gray-900 mb-1">
-                            {website.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 line-clamp-2">
-                            {website.description}
-                          </p>
-                        </div>
-                        <Button
-                          size="sm"
-                          className="w-8 h-8 p-0 rounded-full bg-blue-600 hover:bg-blue-700 flex-shrink-0"
-                          onClick={() => handleAddWebsite(website)}
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                {filteredWebsites.length === 0 && (
-                  <div className="flex items-center justify-center h-32 text-gray-500">
-                    {searchQuery ? '未找到匹配的网站' : '暂无网站数据'}
-                  </div>
+            
+            <div className="flex-1 py-2">
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start h-10 px-4 text-white/80 hover:text-white hover:bg-white/10 transition-colors rounded-none",
+                  activeTab === "components" && "bg-white/20 text-white"
                 )}
-              </div>
-            </TabsContent>
+                onClick={() => setActiveTab("components")}
+              >
+                <span className="text-sm">组件库</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start h-10 px-4 text-white/80 hover:text-white hover:bg-white/10 transition-colors rounded-none",
+                  activeTab === "navigation" && "bg-white/20 text-white"
+                )}
+                onClick={() => setActiveTab("navigation")}
+              >
+                <span className="text-sm">网址导航</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start h-10 px-4 text-white/80 hover:text-white hover:bg-white/10 transition-colors rounded-none",
+                  activeTab === "custom" && "bg-white/20 text-white"
+                )}
+                onClick={() => setActiveTab("custom")}
+              >
+                <span className="text-sm">自定义图标</span>
+              </Button>
+            </div>
+          </div>
 
-            <TabsContent value="custom" className="flex-1 mt-0 max-h-[50vh]  overflow-y-auto">
-              <CustomIconForm
-                currentGroupId={currentGroupId}
-                onSave={handleCustomIconSave}
-                onSaveAndContinue={handleCustomIconSaveAndContinue}
-              />
-            </TabsContent>
-          </Tabs>
+          {/* 右侧内容区域 */}
+          <div className="flex-1 overflow-y-auto hide-scrollbar">
+            {activeTab === "components" && (
+              <div className="flex flex-col h-full">
+                {/* Category Filter */}
+                <div className="px-6 py-4 border-b border-white/10">
+                  <div className="flex flex-wrap gap-2">
+                    {componentCategories.map((category) => (
+                      <Badge
+                        key={category.id}
+                        variant={selectedCategory === category.id ? "default" : "outline"}
+                        className={`cursor-pointer transition-colors ${
+                          selectedCategory === category.id 
+                            ? 'bg-blue-600 text-white' 
+                            : 'hover:bg-white/10 border-white/20 text-white/80'
+                        }`}
+                        onClick={() => setSelectedCategory(category.id)}
+                      >
+                        {category.label}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Components Grid */}
+                <div className="flex-1 p-6 hide-scrollbar overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-4">
+                    {filteredComponents.map((component) => (
+                      <div
+                        key={component.id}
+                        className="relative bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-all"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div 
+                            className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
+                            style={{ backgroundColor: component.color }}
+                          >
+                            {component.icon}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-white mb-1">
+                              {component.title}
+                            </h3>
+                            <p className="text-sm text-white/60 line-clamp-2">
+                              {component.description}
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            className="w-8 h-8 p-0 rounded-full bg-blue-600 hover:bg-blue-700 flex-shrink-0"
+                            onClick={() => handleAddComponent(component)}
+                          >
+                            <Plus className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "navigation" && (
+              <div className="flex flex-col h-full">
+                {/* Search Bar */}
+                <div className="px-6 py-4 border-b border-white/10">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 w-4 h-4" />
+                    <Input
+                      placeholder="请输入搜索名称"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-50 pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/40"
+                    />
+                  </div>
+                </div>
+
+                {/* Website Category Filter */}
+                <div className="px-6 py-4 border-b border-white/10">
+                  <div className="flex flex-wrap gap-2">
+                    {websiteData?.categories.map((category) => (
+                      <Badge
+                        key={category.id}
+                        variant={selectedWebsiteCategory === category.id ? "default" : "outline"}
+                        className={`cursor-pointer transition-colors ${
+                          selectedWebsiteCategory === category.id 
+                            ? 'bg-blue-600 text-white' 
+                            : 'hover:bg-white/10 border-white/20 text-white/80'
+                        }`}
+                        onClick={() => setSelectedWebsiteCategory(category.id)}
+                      >
+                        {category.label}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Websites Grid */}
+                <div className="flex-1 p-6 hide-scrollbar overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-4">
+                    {filteredWebsites.map((website) => (
+                      <div
+                        key={website.id}
+                        className="relative bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-all"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div 
+                            className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
+                            style={{ backgroundColor: website.color }}
+                          >
+                            <img 
+                              src={website.icon} 
+                              alt={website.title}
+                              className="w-8 h-8 object-contain"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  parent.innerHTML = `<span class="text-white font-bold text-lg">${website.title.charAt(0)}</span>`;
+                                }
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-white mb-1">
+                              {website.title}
+                            </h3>
+                            <p className="text-sm text-white/60 line-clamp-2">
+                              {website.description}
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            className="w-8 h-8 p-0 rounded-full bg-blue-600 hover:bg-blue-700 flex-shrink-0"
+                            onClick={() => handleAddWebsite(website)}
+                          >
+                            <Plus className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {filteredWebsites.length === 0 && (
+                    <div className="flex items-center justify-center h-32 text-white/60">
+                      {searchQuery ? '未找到匹配的网站' : '暂无网站数据'}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === "custom" && (
+              <div className="flex-1 overflow-y-auto hide-scrollbar">
+                <CustomIconForm
+                  currentGroupId={currentGroupId}
+                  onSave={handleCustomIconSave}
+                  onSaveAndContinue={handleCustomIconSaveAndContinue}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

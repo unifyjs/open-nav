@@ -140,10 +140,10 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging
             src={icon} 
             alt={title}
             className="object-contain"
-            style={{
-              width: `${responsiveIconSize * 0.6}px`,
-              height: `${responsiveIconSize * 0.6}px`
-            }}
+            // style={{
+            //   width: `${responsiveIconSize * 0.6}px`,
+            //   height: `${responsiveIconSize * 0.6}px`
+            // }}
             onError={(e) => {
               // Fallback to a simple colored square with first letter
               const target = e.target as HTMLImageElement;
@@ -157,7 +157,7 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging
         </div>
         {iconSettings.showName && (
           <span 
-            className="text-white text-center leading-tight px-1 line-clamp-2 text-xs sm:text-sm"
+            className="text-white text-center leading-tight px-1 line-clamp-2 text-xs"
             style={{ fontSize: `${Math.max(iconSettings.nameSize * (responsiveIconSize / iconSettings.iconSize), 10)}px` }}
           >
             {title}
@@ -166,9 +166,9 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging
       </Button>
       
       {/* Drag Handle - visible on hover */}
-      <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-70 transition-opacity duration-200 pointer-events-none">
+      {/* <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-70 transition-opacity duration-200 pointer-events-none">
         <GripVertical className="w-4 h-4 text-white/80" />
-      </div>
+      </div> */}
     </div>
   );
 };

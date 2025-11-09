@@ -1300,7 +1300,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
               value={[iconSettings.iconSize]}
               onValueChange={updateIconSize}
               max={100}
-              min={30}
+              min={50}
               step={1}
               className="w-full"
             />
