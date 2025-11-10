@@ -1,58 +1,162 @@
-# Project Build Guide
+# OpenNav - 高效个人工作台
 
-## Tech Stack
+OpenNav 是一个功能丰富的浏览器新标签页应用，提供高度定制化的个人启动页，集成快速链接、实用工具和信息展示，提升工作效率和上网体验。
 
-This project is built using the following technologies:
+## 🌟 主要特性
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### 🎯 核心功能
+- **智能书签管理** - 支持多分类书签，可自定义图标、颜色和布局
+- **响应式设计** - 自适应布局，图标根据屏幕宽度自动换行排列
+- **侧边栏导航** - 可自定义位置、宽度、透明度和自动隐藏功能
+- **视频背景** - 支持动态视频背景，提升视觉体验
 
-## Prerequisites
+### 🛠️ 实用工具
+- **时间显示** - 可自定义时间格式、字体大小和颜色
+- **搜索栏** - 快速搜索功能
+- **每日名言** - 显示励志名言
+- **下班倒计时** - 工作状态提醒
+- **今日热搜** - 实时热点信息
+- **日历组件** - 日期查看功能
+- **今天吃什么** - 随机推荐美食
 
-Make sure your system has Node.js and npm installed.
+### 🎨 个性化定制
+- **极简模式** - 简洁界面选项
+- **图标设置** - 自定义图标大小、间距和圆角
+- **颜色主题** - 支持自定义颜色方案
+- **布局调整** - 灵活的组件布局配置
 
-We recommend using nvm to install Node.js: [nvm Installation Guide](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🚀 技术栈
 
-## Install Dependencies
+- **前端框架**: React 18 + TypeScript
+- **构建工具**: Vite
+- **UI组件库**: shadcn/ui + Radix UI
+- **样式方案**: Tailwind CSS
+- **状态管理**: React Query
+- **路由管理**: React Router
+- **图标库**: Lucide React
 
-```sh
-npm install
-```
-
-## Development Server
-
-Start the development server with hot reload and instant preview:
-
-```sh
-npm run dev
-```
-
-## Build Project
-
-Build for production:
-
-```sh
-npm run build
-```
-
-## Preview Build
-
-Preview the built project:
-
-```sh
-npm run preview
-```
-
-## Project Structure
+## 📦 项目结构
 
 ```
 src/
-├── components/     # UI Components
-├── pages/         # Page Components
-├── hooks/         # Custom Hooks
-├── lib/           # Utility Library
-└── main.tsx       # Application Entry Point
+├── components/           # 组件目录
+│   ├── dialogs/         # 对话框组件
+│   ├── ui/              # 基础UI组件
+│   ├── widgets/         # 小工具组件
+│   ├── BookmarkGrid.tsx # 书签网格组件
+│   ├── Sidebar.tsx      # 侧边栏组件
+│   ├── TopBar.tsx       # 顶部栏组件
+│   └── ...
+├── pages/               # 页面组件
+│   ├── Index.tsx        # 主页
+│   └── NotFound.tsx     # 404页面
+├── hooks/               # 自定义Hooks
+│   ├── use-mobile.tsx   # 移动端检测
+│   └── use-toast.ts     # 消息提示
+└── lib/                 # 工具库
+    └── utils.ts         # 工具函数
 ```
+
+## 🛠️ 安装与运行
+
+### 环境要求
+- Node.js 16+ 
+- npm 或 pnpm
+
+### 安装依赖
+```bash
+npm install
+# 或使用 pnpm
+pnpm install
+```
+
+### 开发模式
+```bash
+npm run dev
+```
+访问 http://localhost:5173 查看应用
+
+### 生产构建
+```bash
+npm run build
+```
+
+### 预览构建结果
+```bash
+npm run preview
+```
+
+## 📱 响应式设计
+
+项目采用响应式设计，支持不同屏幕尺寸：
+- **桌面端**: 完整功能展示
+- **平板端**: 自适应布局调整
+- **移动端**: 移动端优化界面
+
+### 自适应特性
+- 图标容器使用 Flexbox 布局，支持自动换行
+- 媒体查询适配不同屏幕宽度
+- 移动端侧边栏优化显示
+
+## 🔧 配置说明
+
+### 侧边栏设置
+- 位置: 左侧/右侧
+- 自动隐藏: 鼠标悬停显示
+- 宽度: 可调节侧边栏宽度
+- 透明度: 背景透明度设置
+
+### 时间显示设置
+- 时间格式: 12/24小时制
+- 显示选项: 月日、星期、农历等
+- 字体样式: 大小、颜色、粗细
+
+### 布局设置
+- 极简模式: 简化界面元素
+- 每日名言: 显示/隐藏
+- 图标设置: 大小、间距、圆角
+
+## 🎯 使用指南
+
+### 添加书签
+1. 点击侧边栏的"+"按钮
+2. 填写书签信息（标题、URL、图标）
+3. 选择分类和颜色
+4. 保存书签
+
+### 自定义分类
+1. 右键点击分类标签
+2. 选择"编辑分类"
+3. 修改分类名称和图标
+4. 保存设置
+
+### 调整布局
+1. 进入设置界面
+2. 调整各组件的位置和大小
+3. 保存布局配置
+
+## 🔄 数据存储
+
+应用使用浏览器本地存储保存用户配置：
+- 书签数据
+- 侧边栏设置
+- 时间显示设置
+- 布局偏好
+
+## 📄 许可证
+
+本项目采用 MIT 许可证。
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request 来改进项目。
+
+## 📞 联系方式
+
+如有问题或建议，请通过以下方式联系：
+- 提交 GitHub Issue
+- 发送邮件至开发团队
+
+---
+
+**OpenNav - 让每个新标签页都成为高效工作的起点**
