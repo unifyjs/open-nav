@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
-import { TimeDisplay } from "@/components/TimeDisplay";
-import { SearchBar } from "@/components/SearchBar";
+import { TimeDisplay, SearchBar, DailyQuote } from "@/components/widgets";
 import { BookmarkGrid } from "@/components/BookmarkGrid";
 import { VideoBackground } from "@/components/VideoBackground";
 import { TopBar } from "@/components/TopBar";
-import { DailyQuote } from "@/components/DailyQuote";
 import { DragHint } from "@/components/DragHint";
 import { useMediaQuery } from "@/hooks/use-mobile";
 import { MobileCategorySelector } from "@/components/MobileCategorySelector";

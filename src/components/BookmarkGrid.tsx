@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { BookmarkItem } from "./BookmarkItem";
-import { WidgetItem } from "./WidgetItem";
+import { WidgetItem } from "./widgets";
 import { SizeSelector } from "./SizeSelector";
 import { AddComponentDialog } from "./AddComponentDialog";
 import { useMediaQuery } from "@/hooks/use-mobile";
