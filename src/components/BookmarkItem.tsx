@@ -140,10 +140,6 @@ export const BookmarkItem = ({ title, icon, url, color, size = "1x1", isDragging
             src={icon} 
             alt={title}
             className="object-contain"
-            // style={{
-            //   width: `${responsiveIconSize * 0.6}px`,
-            //   height: `${responsiveIconSize * 0.6}px`
-            // }}
             onError={(e) => {
               // Fallback to a simple colored square with first letter
               const target = e.target as HTMLImageElement;

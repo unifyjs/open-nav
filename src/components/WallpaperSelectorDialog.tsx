@@ -586,7 +586,6 @@ export const WallpaperSelectorDialog = ({
 
   // 获取当前分类和标签的壁纸
   const getFilteredWallpapers = () => {
-    debugger
     if (selectedCategory === "solid") {
       // 显示相似渐变色
       const similarGradients = getSimilarGradients(selectedGradient);
