@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { BookmarkItem } from "./BookmarkItem";
 import { WidgetItem } from "./widgets";
 import { SizeSelector } from "./SizeSelector";
-import { AddComponentDialog } from "./AddComponentDialog";
+import { AddComponentDialog } from "./dialogs/AddComponentDialog";
 import { useMediaQuery } from "@/hooks/use-mobile";
 
 interface BookmarkGridProps {
@@ -537,7 +537,7 @@ export const BookmarkGrid = ({ category, onCategoryChange, categories = [] }: Bo
               setIsAnimating(false);
               setAnimationDirection(null);
               setIsScrolling(false);
-            }, 500); // 动画持续时间
+            }, 100); // 动画持续时间
           }
         }, 100);
       }

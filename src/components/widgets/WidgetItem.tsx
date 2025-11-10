@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Coffee, StickyNote, Timer, TrendingUp } from "lucide-react";
-import { CountdownDialog } from "./CountdownDialog";
-import { MemoDialog } from "./MemoDialog";
+import { CountdownDialog } from "../dialogs/CountdownDialog";
+import { MemoDialog } from "../dialogs/MemoDialog";
 
 interface WidgetItemProps {
   id: string;

@@ -9,9 +9,9 @@ import {
   Bookmark, Tag, Flag, Bell, Mail, Phone,
   Calendar, Clock, Map, Compass, Globe, Wifi
 } from "lucide-react";
-import { SettingsDialog } from "@/components/SettingsDialog";
-import { AddGroupDialog } from "@/components/AddGroupDialog";
-import { EditGroupDialog } from "@/components/EditGroupDialog";
+import { SettingsDialog } from "@/components/dialogs/SettingsDialog";
+import { AddGroupDialog } from "@/components/dialogs/AddGroupDialog";
+import { EditGroupDialog } from "@/components/dialogs/EditGroupDialog";
 import { ContextMenu } from "@/components/ContextMenu";
 
 interface SidebarProps {

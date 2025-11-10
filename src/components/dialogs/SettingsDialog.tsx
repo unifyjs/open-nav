@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WallpaperSelectorDialog } from "./WallpaperSelectorDialog";
-import { ColorPicker } from "./ColorPicker";
+import { ColorPicker } from "../ColorPicker";
 
 interface SettingsDialogProps {
   open: boolean;

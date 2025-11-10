@@ -227,7 +227,7 @@ const Index = () => {
       </div>
       
       {/* Drag Hint */}
-      {!layoutSettings.minimalistMode && <DragHint />}
+      {/* {!layoutSettings.minimalistMode && <DragHint />} */}
     </div>
   );
 };
