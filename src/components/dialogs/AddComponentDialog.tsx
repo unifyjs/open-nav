@@ -176,6 +176,26 @@ const availableComponents: ComponentItem[] = [
     url: "#case-converter",
     category: "tools",
     type: "widget"
+  },
+  {
+    id: "base64-converter",
+    title: "Base64编码解码工具",
+    description: "Base64编码和解码转换工具",
+    icon: "64",
+    color: "#10B981",
+    url: "#base64-converter",
+    category: "tools",
+    type: "widget"
+  },
+  {
+    id: "md5-converter",
+    title: "MD5加密工具",
+    description: "MD5哈希加密和验证工具",
+    icon: "#",
+    color: "#EF4444",
+    url: "#md5-converter",
+    category: "tools",
+    type: "widget"
   }
 ];
 
