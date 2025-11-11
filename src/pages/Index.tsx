@@ -38,32 +38,55 @@ const DATETIME_STORAGE_KEY = "datetime_settings";
 const SIDEBAR_STORAGE_KEY = "sidebar_settings";
 const LAYOUT_STORAGE_KEY = "layout_settings";
 
-const defaultCategories: Category[] = [
-  { id: "主页", label: "主页", icon: "Home" },
-  { id: "AI", label: "AI", icon: "Bot" },
-  { id: "摸鱼", label: "摸鱼", icon: "Coffee" },
-  { id: "开发", label: "开发", icon: "Code" },
-  { id: "设计", label: "设计", icon: "Palette" },
-  { id: "新媒体", label: "新媒体", icon: "Megaphone" },
-];
-
-const defaultSettings: DateTimeSettings = {
-  showTime: true,
-  showSearchBar: true,
-  showMonthDay: true,
-  showWeek: true,
-  showLunar: true,
-  show24Hour: true,
-  showSeconds: false,
-  isBold: false,
-  fontSize: 70,
-  fontColor: "#ffffff"
+// 从配置文件加载数据
+const loadAppConfig = async () => {
+  try {
+    const response = await fetch('/data/app-config.json');
+    const config = await response.json();
+    return config;
+  } catch (error) {
+    console.error('Failed to load app config:', error);
+    // 返回默认配置作为后备
+    return {
+      defaultCategories: [
+        { id: "主页", label: "主页", icon: "Home" },
+        { id: "AI", label: "AI", icon: "Bot" },
+        { id: "摸鱼", label: "摸鱼", icon: "Coffee" },
+        { id: "开发", label: "开发", icon: "Code" },
+        { id: "设计", label: "设计", icon: "Palette" },
+        { id: "新媒体", label: "新媒体", icon: "Megaphone" },
+      ],
+      defaultSettings: {
+        showTime: true,
+        showSearchBar: true,
+        showMonthDay: true,
+        showWeek: true,
+        showLunar: true,
+        show24Hour: true,
+        showSeconds: false,
+        isBold: false,
+        fontSize: 70,
+        fontColor: "#ffffff"
+      }
+    };
+  }
 };
 
 const Index = () => {
   const [currentCategory, setCurrentCategory] = useState("主页");
-  const [settings, setSettings] = useState<DateTimeSettings>(defaultSettings);
-  const [categories, setCategories] = useState<Category[]>(defaultCategories);
+  const [settings, setSettings] = useState<DateTimeSettings>({
+    showTime: true,
+    showSearchBar: true,
+    showMonthDay: true,
+    showWeek: true,
+    showLunar: true,
+    show24Hour: true,
+    showSeconds: false,
+    isBold: false,
+    fontSize: 70,
+    fontColor: "#ffffff"
+  });
+  const [categories, setCategories] = useState<Category[]>([]);
   
   // 响应式断点检测
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -79,9 +102,16 @@ const Index = () => {
     showDailyQuote: true
   });
 
-  // 加载分组数据
+  // 加载配置数据
   useEffect(() => {
-    let processedCategories = [...defaultCategories];
+    const initializeApp = async () => {
+      const config = await loadAppConfig();
+      
+      // 设置默认设置
+      setSettings(prevSettings => ({ ...prevSettings, ...config.defaultSettings }));
+      
+      // 处理分组数据
+      let processedCategories = [...config.defaultCategories];
     
     // 处理隐藏的默认分组
     const hiddenDefaults = JSON.parse(localStorage.getItem('hidden_default_categories') || '[]');
@@ -104,8 +134,11 @@ const Index = () => {
         console.error('Failed to parse custom categories:', error);
       }
     }
+      
+      setCategories(processedCategories);
+    };
     
-    setCategories(processedCategories);
+    initializeApp();
   }, []);
 
   // 加载设置

@@ -1,0 +1,22 @@
+{
+  "defaultCategories": [
+    { "id": "主页", "label": "主页", "icon": "Home" },
+    { "id": "AI", "label": "AI", "icon": "Bot" },
+    { "id": "摸鱼", "label": "摸鱼", "icon": "Coffee" },
+    { "id": "开发", "label": "开发", "icon": "Code" },
+    { "id": "设计", "label": "设计", "icon": "Palette" },
+    { "id": "新媒体", "label": "新媒体", "icon": "Megaphone" }
+  ],
+  "defaultSettings": {
+    "showTime": true,
+    "showSearchBar": true,
+    "showMonthDay": true,
+    "showWeek": true,
+    "showLunar": true,
+    "show24Hour": true,
+    "showSeconds": false,
+    "isBold": false,
+    "fontSize": 70,
+    "fontColor": "#ffffff"
+  }
+}
