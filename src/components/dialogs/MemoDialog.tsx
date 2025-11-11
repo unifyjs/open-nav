@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { X, ChevronUp, ChevronDown, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { X, ChevronUp, ChevronDown, Plus, Search, Trash2, Pin, PinOff } from "lucide-react";
 
 interface MemoDialogProps {
   open: boolean;
@@ -21,6 +22,7 @@ interface Memo {
   content: string;
   createdAt: Date;
   updatedAt: Date;
+  isPinned?: boolean;
 }
 
 const defaultMemos: Memo[] = [
@@ -43,6 +45,7 @@ const defaultMemos: Memo[] = [
 了解更多：https://OpenNav.com/help`,
     createdAt: new Date("2024-10-30T10:00:00"),
     updatedAt: new Date("2024-10-31T15:30:00"),
+    isPinned: true,
   },
   {
     id: "2", 
@@ -57,6 +60,7 @@ const defaultMemos: Memo[] = [
 备注：记得提前15分钟参加会议`,
     createdAt: new Date("2024-10-31T09:00:00"),
     updatedAt: new Date("2024-10-31T09:00:00"),
+    isPinned: false,
   }
 ];
 
@@ -64,6 +68,10 @@ export const MemoDialog = ({ open, onOpenChange }: MemoDialogProps) => {
   const [memos, setMemos] = useState<Memo[]>([]);
   const [selectedMemoId, setSelectedMemoId] = useState<string>("");
   const [editingContent, setEditingContent] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [editingTitle, setEditingTitle] = useState<string | null>(null);
+  const [tempTitle, setTempTitle] = useState("");
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   // Load memos from localStorage on component mount
   useEffect(() => {
@@ -74,6 +82,7 @@ export const MemoDialog = ({ open, onOpenChange }: MemoDialogProps) => {
           ...memo,
           createdAt: new Date(memo.createdAt),
           updatedAt: new Date(memo.updatedAt),
+          isPinned: memo.isPinned || false,
         }));
         setMemos(parsedMemos);
         if (parsedMemos.length > 0) {
@@ -117,6 +126,17 @@ export const MemoDialog = ({ open, onOpenChange }: MemoDialogProps) => {
 
   const selectedMemo = memos.find(memo => memo.id === selectedMemoId);
 
+  // Filter memos based on search query
+  const filteredMemos = memos.filter(memo => 
+    memo.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    memo.content.toLowerCase().includes(searchQuery.toLowerCase())
+  ).sort((a, b) => {
+    // Sort by pinned status first, then by updated date
+    if (a.isPinned && !b.isPinned) return -1;
+    if (!a.isPinned && b.isPinned) return 1;
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+  });
+
   const handleMemoSelect = (memoId: string) => {
     const memo = memos.find(m => m.id === memoId);
     if (memo) {
@@ -137,11 +157,73 @@ export const MemoDialog = ({ open, onOpenChange }: MemoDialogProps) => {
       content: "",
       createdAt: now,
       updatedAt: now,
+      isPinned: false,
     };
     
     setMemos(prev => [newMemo, ...prev]);
     setSelectedMemoId(newMemo.id);
     setEditingContent("");
+  };
+
+  const handleDeleteMemo = (memoId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setMemos(prev => prev.filter(memo => memo.id !== memoId));
+    if (selectedMemoId === memoId) {
+      const remainingMemos = memos.filter(memo => memo.id !== memoId);
+      if (remainingMemos.length > 0) {
+        setSelectedMemoId(remainingMemos[0].id);
+        setEditingContent(remainingMemos[0].content);
+      } else {
+        setSelectedMemoId("");
+        setEditingContent("");
+      }
+    }
+  };
+
+  const handleTogglePin = (memoId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setMemos(prev => prev.map(memo => 
+      memo.id === memoId 
+        ? { ...memo, isPinned: !memo.isPinned, updatedAt: new Date() }
+        : memo
+    ));
+  };
+
+  const handleTitleEdit = (memoId: string) => {
+    const memo = memos.find(m => m.id === memoId);
+    if (memo) {
+      setEditingTitle(memoId);
+      setTempTitle(memo.title);
+      setTimeout(() => titleInputRef.current?.focus(), 0);
+    }
+  };
+
+  const handleTitleSave = () => {
+    if (editingTitle && tempTitle.trim()) {
+      setMemos(prev => prev.map(memo => 
+        memo.id === editingTitle 
+          ? { ...memo, title: tempTitle.trim(), updatedAt: new Date() }
+          : memo
+      ));
+    }
+    setEditingTitle(null);
+    setTempTitle("");
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleTitleSave();
+    } else if (e.key === 'Escape') {
+      setEditingTitle(null);
+      setTempTitle("");
+    }
+  };
+
+  // Highlight search text in content
+  const highlightText = (text: string, query: string) => {
+    if (!query) return text;
+    const regex = new RegExp(`(${query})`, 'gi');
+    return text.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
   };
 
   const formatDate = (date: Date) => {
@@ -172,28 +254,88 @@ export const MemoDialog = ({ open, onOpenChange }: MemoDialogProps) => {
                   </Button>
                 </div>
               </div>
+              {/* Search Box */}
+              <div className="relative mt-3">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="搜索备忘录..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-white"
+                />
+              </div>
             </DialogHeader>
             
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-2">
-                {memos.map((memo) => (
+                {filteredMemos.map((memo) => (
                   <div
                     key={memo.id}
-                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                    className={`group p-3 rounded-lg cursor-pointer transition-colors relative ${
                       selectedMemoId === memo.id
                         ? 'bg-white border-l-4 border-blue-500 shadow-sm'
                         : 'bg-gray-100 hover:bg-gray-200'
                     }`}
                     onClick={() => handleMemoSelect(memo.id)}
                   >
-                    <div className="font-medium text-sm text-gray-800 mb-1">
-                      {memo.title}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {formatDate(memo.updatedAt)}
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm text-gray-800 mb-1 flex items-center gap-1">
+                          {memo.isPinned && <Pin className="h-3 w-3 text-blue-500" />}
+                          <span 
+                            dangerouslySetInnerHTML={{
+                              __html: highlightText(memo.title, searchQuery)
+                            }}
+                          />
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {formatDate(memo.updatedAt)}
+                        </div>
+                        {searchQuery && memo.content.toLowerCase().includes(searchQuery.toLowerCase()) && (
+                          <div 
+                            className="text-xs text-gray-600 mt-1 line-clamp-2"
+                            dangerouslySetInnerHTML={{
+                              __html: highlightText(
+                                memo.content.substring(0, 100) + (memo.content.length > 100 ? '...' : ''),
+                                searchQuery
+                              )
+                            }}
+                          />
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 hover:bg-blue-100"
+                          onClick={(e) => handleTogglePin(memo.id, e)}
+                          title={memo.isPinned ? "取消置顶" : "置顶"}
+                        >
+                          {memo.isPinned ? (
+                            <PinOff className="h-3 w-3 text-blue-500" />
+                          ) : (
+                            <Pin className="h-3 w-3 text-gray-500" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 hover:bg-red-100"
+                          onClick={(e) => handleDeleteMemo(memo.id, e)}
+                          title="删除"
+                        >
+                          <Trash2 className="h-3 w-3 text-red-500" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
+                {filteredMemos.length === 0 && searchQuery && (
+                  <div className="text-center text-gray-500 py-8">
+                    <Search className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                    <p>未找到匹配的备忘录</p>
+                  </div>
+                )}
               </div>
             </ScrollArea>
             
@@ -211,9 +353,24 @@ export const MemoDialog = ({ open, onOpenChange }: MemoDialogProps) => {
           {/* Right Content Area */}
           <div className="flex-1 flex flex-col">
             <div className="flex items-center justify-between p-4 border-b">
-              <DialogTitle className="text-xl font-semibold">
-                {selectedMemo?.title || "备忘录"}
-              </DialogTitle>
+              {editingTitle === selectedMemoId ? (
+                <Input
+                  ref={titleInputRef}
+                  value={tempTitle}
+                  onChange={(e) => setTempTitle(e.target.value)}
+                  onBlur={handleTitleSave}
+                  onKeyDown={handleTitleKeyDown}
+                  className="text-xl font-semibold border-none p-0 focus:ring-0 focus-visible:ring-0"
+                />
+              ) : (
+                <DialogTitle 
+                  className="text-xl font-semibold cursor-pointer hover:bg-gray-100 px-2 py-1 rounded transition-colors"
+                  onClick={() => selectedMemo && handleTitleEdit(selectedMemo.id)}
+                  title="点击编辑标题"
+                >
+                  {selectedMemo?.title || "备忘录"}
+                </DialogTitle>
+              )}
             </div>
             
             <div className="flex-1 p-1">
