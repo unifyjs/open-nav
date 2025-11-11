@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { BookmarkItem } from "./BookmarkItem";
 import { WidgetItem } from "./widgets";
 import { SizeSelector } from "./SizeSelector";
-import { AddComponentDialog } from "./dialogs/AddComponentDialog";
+import { AddComponentDialog, CaseConverterDialog } from "./dialogs";
 import { useMediaQuery } from "@/hooks/use-mobile";
 
 interface BookmarkGridProps {
@@ -49,6 +49,7 @@ export const BookmarkGrid = ({ category, onCategoryChange, categories = [] }: Bo
   const [draggedItem, setDraggedItem] = useState<GridItem | null>(null);
   const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showCaseConverterDialog, setShowCaseConverterDialog] = useState(false);
   const [openInNewTab, setOpenInNewTab] = useState(true); // 默认在新标签页打开
   const [iconSettings, setIconSettings] = useState<IconSettings>({
     iconSize: 60,
@@ -335,6 +336,13 @@ export const BookmarkGrid = ({ category, onCategoryChange, categories = [] }: Bo
       return;
     }
     
+    // Check if this is the case converter component
+    if (item.id === "case-converter" || item.url === "#case-converter") {
+      e.preventDefault();
+      setShowCaseConverterDialog(true);
+      return;
+    }
+    
     // Handle normal bookmark clicks
     if (item.url && item.url.startsWith('chrome://') || item.url === '#') {
       // For demo purposes, just show an alert for chrome:// URLs and placeholder links
@@ -581,6 +589,12 @@ return (
         onOpenChange={setShowAddDialog}
         onAddComponent={handleAddComponent}
         currentGroupId={category}
+      />
+      
+      {/* Case Converter Dialog */}
+      <CaseConverterDialog
+        open={showCaseConverterDialog}
+        onOpenChange={setShowCaseConverterDialog}
       />
     </div>
   );

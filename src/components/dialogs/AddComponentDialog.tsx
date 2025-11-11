@@ -166,6 +166,16 @@ const availableComponents: ComponentItem[] = [
     url: "https://regex101.com/",
     category: "development",
     type: "bookmark"
+  },
+  {
+    id: "case-converter",
+    title: "字母大小写转换",
+    description: "英文字母大小写格式转换",
+    icon: "Aa",
+    color: "#8B5CF6",
+    url: "#case-converter",
+    category: "tools",
+    type: "widget"
   }
 ];
 
