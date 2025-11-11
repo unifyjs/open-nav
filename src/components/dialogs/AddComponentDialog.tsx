@@ -196,6 +196,16 @@ const availableComponents: ComponentItem[] = [
     url: "#md5-converter",
     category: "tools",
     type: "widget"
+  },
+  {
+    id: "aes-converter",
+    title: "AES加密解密",
+    description: "AES对称加密解密工具，支持多种模式",
+    icon: "🔐",
+    color: "#3B82F6",
+    url: "#aes-converter",
+    category: "tools",
+    type: "widget"
   }
 ];
 

@@ -1,6 +1,7 @@
 // Dialog components index file
 export { AddComponentDialog } from './AddComponentDialog';
 export { AddGroupDialog } from './AddGroupDialog';
+export { AESDialog } from './AESDialog';
 export { Base64Dialog } from './Base64Dialog';
 export { CaseConverterDialog } from './CaseConverterDialog';
 export { CountdownDialog } from './CountdownDialog';

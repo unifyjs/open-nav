@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { BookmarkItem } from "./BookmarkItem";
 import { WidgetItem } from "./widgets";
 import { SizeSelector } from "./SizeSelector";
-import { AddComponentDialog, CaseConverterDialog, Base64Dialog, MD5Dialog } from "./dialogs";
+import { AddComponentDialog, CaseConverterDialog, Base64Dialog, MD5Dialog, AESDialog } from "./dialogs";
 import { useMediaQuery } from "@/hooks/use-mobile";
 
 interface BookmarkGridProps {
@@ -52,6 +52,7 @@ export const BookmarkGrid = ({ category, onCategoryChange, categories = [] }: Bo
   const [showCaseConverterDialog, setShowCaseConverterDialog] = useState(false);
   const [showBase64Dialog, setShowBase64Dialog] = useState(false);
   const [showMD5Dialog, setShowMD5Dialog] = useState(false);
+  const [showAESDialog, setShowAESDialog] = useState(false);
   const [openInNewTab, setOpenInNewTab] = useState(true); // 默认在新标签页打开
   const [iconSettings, setIconSettings] = useState<IconSettings>({
     iconSize: 60,
@@ -359,6 +360,13 @@ export const BookmarkGrid = ({ category, onCategoryChange, categories = [] }: Bo
       return;
     }
     
+    // Check if this is the aes converter component
+    if (item.id === "aes-converter" || item.url === "#aes-converter") {
+      e.preventDefault();
+      setShowAESDialog(true);
+      return;
+    }
+    
     // Handle normal bookmark clicks
     if (item.url && item.url.startsWith('chrome://') || item.url === '#') {
       // For demo purposes, just show an alert for chrome:// URLs and placeholder links
@@ -623,6 +631,12 @@ return (
       <MD5Dialog
         open={showMD5Dialog}
         onOpenChange={setShowMD5Dialog}
+      />
+      
+      {/* AES Dialog */}
+      <AESDialog
+        open={showAESDialog}
+        onOpenChange={setShowAESDialog}
       />
     </div>
   );
