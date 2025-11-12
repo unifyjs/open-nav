@@ -166,7 +166,7 @@ export const Base64Dialog = ({ open, onOpenChange }: Base64DialogProps) => {
               Base64编码解码工具
             </div>
             <button
-              onClick={() => window.open('#/tools/base64', '_blank')}
+              onClick={() => window.open('/tools/base64', '_blank')}
               className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
               title="在新页面打开"
             >

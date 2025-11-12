@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Copy, RotateCcw, Hash } from "lucide-react";
+import { Copy, RotateCcw, Hash, ExternalLink } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface MD5DialogProps {
@@ -151,9 +151,18 @@ export const MD5Dialog = ({ open, onOpenChange }: MD5DialogProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl min-h-[80vh] max-h-[90vh] bg-slate-800/95 backdrop-blur-sm border border-white/20 text-white">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-white flex items-center gap-2">
-            <Hash className="w-6 h-6" />
-            MD5加密工具
+          <DialogTitle className="text-xl font-semibold text-white flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Hash className="w-6 h-6" />
+              MD5加密工具
+            </div>
+            <button
+              onClick={() => window.open('/tools/md5', '_blank')}
+              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+              title="在新页面打开"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </button>
           </DialogTitle>
         </DialogHeader>
         

@@ -164,29 +164,29 @@ const Base64ToolPage = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Sidebar */}
       <ToolsSidebar currentTool="base64" />
       
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">64</span>
+        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 px-6 py-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-xl">64</span>
             </div>
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Base64编码解码工具</h1>
-              <p className="text-sm text-gray-600 mt-1">在线Base64编码解码，支持文本与Base64格式互相转换</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-1">Base64编码解码工具</h1>
+              <p className="text-gray-600">在线Base64编码解码，支持文本与Base64格式互相转换，安全可靠</p>
             </div>
           </div>
         </div>
 
         {/* Tool Content */}
         <div className="flex-1 p-6 overflow-auto">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 p-8">
               {/* 标签切换 */}
               <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-6">

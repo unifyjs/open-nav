@@ -151,7 +151,7 @@ export const ToolsSidebar = ({ currentTool, onToolSelect }: ToolsSidebarProps) =
     if (onToolSelect) {
       onToolSelect(toolPath);
     } else {
-      window.location.href = `#${toolPath}`;
+      window.location.href = toolPath;
     }
   };
 
