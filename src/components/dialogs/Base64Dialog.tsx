@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, RotateCcw, ArrowUpDown } from "lucide-react";
+import { Copy, RotateCcw, ArrowUpDown, ExternalLink } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface Base64DialogProps {
@@ -160,9 +160,18 @@ export const Base64Dialog = ({ open, onOpenChange }: Base64DialogProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl min-h-[80vh] max-h-[90vh] bg-slate-800/95 backdrop-blur-sm border border-white/20 text-white">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-white flex items-center gap-2">
-            <span className="text-2xl">64</span>
-            Base64编码解码工具
+          <DialogTitle className="text-xl font-semibold text-white flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">64</span>
+              Base64编码解码工具
+            </div>
+            <button
+              onClick={() => window.open('#/tools/base64', '_blank')}
+              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+              title="在新页面打开"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </button>
           </DialogTitle>
         </DialogHeader>
         
